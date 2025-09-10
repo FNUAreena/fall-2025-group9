@@ -1,6 +1,6 @@
 # cookbooks/config.py
 import os
-BASE = os.environ.get("FCPS_BASE", "/content/drive/MyDrive/FCPS")
+BASE = os.environ.get("FCPS_BASE", "/content/drive/MyDrive/Capstone Project/Data")
 
 # INPUTS (EDIT folder names if different)
 LUNCH_HTML_DIR     = f"{BASE}/May 2025 Lunch production records/May 2025 Lunch production records"
