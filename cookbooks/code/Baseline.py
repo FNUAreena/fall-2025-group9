@@ -1,5 +1,6 @@
 #%%
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("/Users/chayachandana/Desktop/combined_breakfast_lunch.csv")
 df['date'] = pd.to_datetime(df['date'])
@@ -23,12 +24,9 @@ df['abs_baseline_error'] = df['baseline_error'].abs()
 mae = df['abs_baseline_error'].mean()
 print(f"Baseline MAE (mean absolute error): {mae:.2f}")
 
-# Optional: see actual vs predicted for a sample
 print(df[['date', 'school_id', 'session', 'name', 'left_over_total', 'median_leftover', 'baseline_error']].head(10))
 
 # %%
-import matplotlib.pyplot as plt
-
 df_sorted = df.sort_values('date')
 
 plt.figure(figsize=(12,6))
