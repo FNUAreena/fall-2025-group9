@@ -474,4 +474,5 @@ print("• Chart 3: Schools vary widely in consumption levels")
 print("• Chart 4: 12% buffer recommended across all days")
 print("• Chart 5: 82.0% demand met rate with significant over/underproduction")
 print("• Chart 6: Tuesday has highest waste reduction potential (32.9 meals)")
+
 # %%
