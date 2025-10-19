@@ -23,7 +23,7 @@ for col in numeric_columns:
 print(f"\nAfter type conversion:")
 print(df[numeric_columns].describe())
 
-holiday_dates = ['2025-05-05', '2025-05-12', '2025-05-19', '2025-05-26']
+holiday_dates = ['2025-05-26']
 holiday_dates = [pd.to_datetime(date) for date in holiday_dates]
 df_clean = df[~df['Date'].isin(holiday_dates)]
 df_clean = df_clean[df_clean['Served_Total'] > 0]
@@ -123,13 +123,17 @@ print("=== STEP 7: BACKTESTING EVALUATION ===")
 
 def backtest_baseline_model(df_test, baseline_plan, test_dates):
     """
-    Backtest the baseline model on test dates
+    Backtest the baseline model on test dates with fallback handling for missing weekdays.
     """
     results = []
+    
+    global_fallback = baseline_plan['Baseline_Plan'].median()  
     
     for school in df_test['School_Name'].unique():
         school_data = df_test[df_test['School_Name'] == school]
         school_baseline = baseline_plan[baseline_plan['School_Name'] == school]
+        
+        school_fallback = school_baseline['Baseline_Plan'].median() if len(school_baseline) > 0 else global_fallback
         
         for date in test_dates:
             date_data = school_data[school_data['Date'] == date]
@@ -140,38 +144,40 @@ def backtest_baseline_model(df_test, baseline_plan, test_dates):
             actual_served = date_data['Served_Total'].iloc[0]
             actual_offered = date_data['Offered_Total'].iloc[0]
             
-            
             baseline_pred = school_baseline[school_baseline['Weekday'] == weekday]['Baseline_Plan']
+            
             if len(baseline_pred) > 0:
                 predicted_plan = baseline_pred.iloc[0]
+            else:
+                predicted_plan = school_fallback  
                 
-               
-                demand_met = min(predicted_plan, actual_served) / actual_served if actual_served > 0 else 1
-                overproduction = max(0, predicted_plan - actual_served)
-                underproduction = max(0, actual_served - predicted_plan)
-                waste_reduction = max(0, actual_offered - predicted_plan)
-                
-                results.append({
-                    'School_Name': school,
-                    'Date': date,
-                    'Weekday': weekday,
-                    'Actual_Served': actual_served,
-                    'Actual_Offered': actual_offered,
-                    'Baseline_Plan': predicted_plan,
-                    'Demand_Met_Rate': demand_met,
-                    'Overproduction': overproduction,
-                    'Underproduction': underproduction,
-                    'Waste_Reduction': waste_reduction
-                })
+            demand_met = min(predicted_plan, actual_served) / actual_served if actual_served > 0 else 1
+            overproduction = max(0, predicted_plan - actual_served)
+            underproduction = max(0, actual_served - predicted_plan)
+            waste_reduction = max(0, actual_offered - predicted_plan)
+            
+            results.append({
+                'School_Name': school,
+                'Date': date,
+                'Weekday': weekday,
+                'Actual_Served': actual_served,
+                'Actual_Offered': actual_offered,
+                'Baseline_Plan': predicted_plan,
+                'Demand_Met_Rate': demand_met,
+                'Overproduction': overproduction,
+                'Underproduction': underproduction,
+                'Waste_Reduction': waste_reduction
+            })
     
     return pd.DataFrame(results)
+
 
 all_dates = sorted(df_final['Date'].unique())
 split_point = int(len(all_dates) * 0.7)
 train_dates = all_dates[:split_point]
 test_dates = all_dates[split_point:]
 
-print(f"Training dates: {len(train_dates)} days ({train_dates[0]} to {train_dates[-1]})")
+print(f"Training dates: {len(train_dates)} days ({train_dates[0]} to {train_dates[-1]})") 
 print(f"Testing dates: {len(test_dates)} days ({test_dates[0]} to {test_dates[-1]})")
 
 train_data = df_final[df_final['Date'].isin(train_dates)]
@@ -179,7 +185,9 @@ baseline_plan_train = train_data.groupby(['School_Name', 'Weekday']).agg({
     'Served_Total': 'median',
     'Offered_Ratio_Clipped': 'median'
 }).reset_index()
-baseline_plan_train['Baseline_Plan'] = baseline_plan_train['Served_Total'] * baseline_plan_train['Offered_Ratio_Clipped']
+baseline_plan_train['Baseline_Plan'] = (
+    baseline_plan_train['Served_Total'] * baseline_plan_train['Offered_Ratio_Clipped']
+)
 
 print(f"\nTraining baseline statistics:")
 print(f"Average baseline plan: {baseline_plan_train['Baseline_Plan'].mean():.2f} meals")
@@ -192,7 +200,7 @@ print(f"Number of test predictions: {len(backtest_results)}")
 print(f"Schools evaluated: {backtest_results['School_Name'].nunique()}")
 
 if len(backtest_results) > 0:
-   
+
     avg_demand_met = backtest_results['Demand_Met_Rate'].mean() * 100
     total_overproduction = backtest_results['Overproduction'].sum()
     total_underproduction = backtest_results['Underproduction'].sum()
@@ -204,7 +212,6 @@ if len(backtest_results) > 0:
     print(f"Total Underproduction: {total_underproduction:.0f} meals")
     print(f"Total Waste Reduction Potential: {total_waste_reduction:.0f} meals")
     
-   
     print(f"\nPERFORMANCE BY WEEKDAY:")
     weekday_performance = backtest_results.groupby('Weekday').agg({
         'Demand_Met_Rate': 'mean',
@@ -300,7 +307,7 @@ print(f"Average meals consumed: {df_corrected['Served_Total'].mean():.1f}")
 print(f"Total consumption opportunity: {df_corrected['Served_Total'].sum():.0f} meals")
 
 print(f"\n3. BASELINE PLAN PERFORMANCE (from backtesting):")
-print(f"Demand Met Rate: 82.4% - This is reliable")
+print(f"Demand Met Rate: 82.0% - This is reliable")
 print(f"Identified Tuesday as highest opportunity day")
 print(f"Friday has highest consumption")
 
@@ -308,21 +315,21 @@ print(f"\n NEW STRATEGY:")
 print("Since waste data is unreliable, focus on:")
 print("1. OPTIMIZING MEETING STUDENT DEMAND")
 print("2. Using consumption patterns for better planning") 
-print("3. The 82.4% demand met rate as our key metric")
+print("3. The 82.0% demand met rate as our key metric")
 print("4. Tuesday-Friday patterns for production planning")
 # %%
 print("=== STEP 11: FINAL SUMMARY & RECOMMENDATIONS ===")
 print("=" * 60)
 
 print("\n PROJECT SUMMARY:")
-print(f"• Analyzed: 1,143 reliable records across 160+ schools")
-print(f"• Time Period: 18 school days in May 2025") 
+print(f"• Analyzed: 1,302 reliable records across 160+ schools")
+print(f"• Time Period: 21 school days in May 2025") 
 print(f"• Key Finding: Waste data unreliable, but consumption patterns are solid")
 
 print("\n KEY RELIABLE FINDINGS:")
 print(f"1. Consumption Patterns: Clear weekly rhythm")
 print(f"   Friday: 29.8 meals (peak) → Wednesday: 22.9 meals (lowest)")
-print(f"2. Demand Met Rate: 82.4% (room for improvement)")
+print(f"2. Demand Met Rate: 82.0% (room for improvement)")
 print(f"3. Tuesday Opportunity: Highest optimization potential")
 
 print("\n TEMPORAL PATTERNS:")
@@ -339,7 +346,7 @@ print("\n WASTE REDUCTION STRATEGY:")
 print("Since waste data is unreliable, we optimize differently:")
 print("1. FOCUS on meeting 100% of student demand")
 print("2. USE consumption patterns for precise production")
-print("3. TARGET 82.4% → 90%+ demand met rate")
+print("3. TARGET 82.0% → 90%+ demand met rate")
 print("4. ELIMINATE both overproduction AND underproduction")
 
 print("\n IMMEDIATE ACTIONS:")
@@ -349,9 +356,9 @@ print("3. Focus on fixing under-producing schools")
 print("4. Use ARIMAX for school-level customization")
 
 print("\n SUCCESS METRICS:")
-print("Demand met rate: 82.4% → 90%+ (primary goal)")
-print("Eliminate underproduction: 6,998 meals")
-print("Reduce overproduction: 6,068 meals")
+print("Demand met rate: 82.0% → 90%+ (primary goal)")
+print("Eliminate underproduction: 8,868 meals")
+print("Reduce overproduction: 7,387 meals")
 print("Better match Friday-Wednesday production ratios")
 
 print("\n DATA QUALITY NOTES:")
@@ -365,7 +372,7 @@ print(f"\n PROJECT COMPLETE!")
 print("We successfully:")
 print("Cleaned and validated the dataset")
 print("Created a reliable baseline weekday median plan") 
-print("Backtested with 82.4% demand met rate")
+print("Backtested with 82.0% demand met rate")
 print("Analyzed temporal patterns")
 print("Selected ARIMAX as the optimal model")
 print("Developed a practical optimization strategy")
@@ -381,7 +388,7 @@ fig.suptitle('Fairfax County Schools Meal Optimization Analysis', fontsize=16, f
 
 # 1. Weekly Consumption Pattern
 weekday_means = df_viz.groupby('Weekday')['Served_Total'].mean()
-weekday_means = weekday_means.reindex(['Tuesday', 'Wednesday', 'Thursday', 'Friday'])
+weekday_means = weekday_means.reindex(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])
 colors = ['lightblue', 'lightcoral', 'lightgreen', 'gold']
 axes[0,0].bar(weekday_means.index, weekday_means.values, color=colors, alpha=0.7, edgecolor='black')
 axes[0,0].set_title('Average Meals Consumed by Weekday', fontweight='bold')
@@ -410,9 +417,9 @@ axes[0,2].grid(True, alpha=0.3)
 
 # 4. Current vs Recommended Production
 comparison_data = pd.DataFrame({
-    'Day': ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    'Current': [24.9, 22.9, 26.0, 29.8],
-    'Recommended': [24.9 * 1.12, 22.9 * 1.12, 26.0 * 1.12, 29.8 * 1.12]  
+    'Day': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    'Current': [23.9, 24.9, 22.9, 26.0, 29.8],
+    'Recommended': [23.9 * 1.12, 24.9 * 1.12, 22.9 * 1.12, 26.0 * 1.12, 29.8 * 1.12]  
 })
 
 x = np.arange(len(comparison_data))
@@ -428,7 +435,7 @@ axes[1,0].grid(True, alpha=0.3)
 # 5. Backtesting Performance Summary
 performance_metrics = pd.DataFrame({
     'Metric': ['Demand Met Rate', 'Underproduction', 'Overproduction'],
-    'Value': [82.4, 6998, 6068]
+    'Value': [82.0, 8868, 7387]
 })
 
 colors = ['green', 'red', 'orange']
@@ -444,7 +451,7 @@ for i, v in enumerate(performance_metrics['Value']):
 # 6. Optimization Priority
 priority_data = pd.DataFrame({
     'Day': ['Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    'Priority': [33.1, 12.1, 21.0, 15.5] 
+    'Priority': [32.9, 14.1, 20.8, 15.1] 
 })
 
 colors = ['red' if x == priority_data['Priority'].max() else 'orange' for x in priority_data['Priority']]
@@ -465,6 +472,6 @@ print("• Chart 1: Clear Friday peak (29.8 meals) vs Wednesday low (22.9 meals)
 print("• Chart 2: Daily consumption shows consistent patterns over time")
 print("• Chart 3: Schools vary widely in consumption levels")
 print("• Chart 4: 12% buffer recommended across all days")
-print("• Chart 5: 82.4% demand met rate with significant over/underproduction")
-print("• Chart 6: Tuesday has highest waste reduction potential (33.1 meals)")
+print("• Chart 5: 82.0% demand met rate with significant over/underproduction")
+print("• Chart 6: Tuesday has highest waste reduction potential (32.9 meals)")
 # %%
