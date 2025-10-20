@@ -483,3 +483,100 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import xgboost as xgb
 
+
+print("1. Preparing features for machine learning...")
+
+df_ml = df_corrected.copy()
+
+df_ml['DayOfWeek'] = df_ml['Date'].dt.dayofweek
+df_ml['WeekOfMonth'] = df_ml['Date'].dt.day // 7 + 1
+df_ml['Is_Friday'] = (df_ml['Weekday'] == 'Friday').astype(int)
+df_ml['Is_Tuesday'] = (df_ml['Weekday'] == 'Tuesday').astype(int)
+
+school_stats = df_ml.groupby('School_Name').agg({
+    'Served_Total': ['mean', 'std', 'count']
+}).reset_index()
+school_stats.columns = ['School_Name', 'School_Mean', 'School_Std', 'School_Count']
+df_ml = df_ml.merge(school_stats, on='School_Name', how='left')
+
+df_ml['Overproduction'] = np.maximum(0, df_ml['Offered_Total'] - df_ml['Served_Total'])
+df_ml['Underproduction'] = np.maximum(0, df_ml['Served_Total'] - df_ml['Offered_Total'])
+df_ml['Optimal_Production'] = df_ml['Served_Total'] * 1.12  # 12% buffer
+
+print(f"Features prepared: {len(df_ml)} records")
+
+# Prepare feature matrix
+features = ['DayOfWeek', 'WeekOfMonth', 'Is_Friday', 'Is_Tuesday', 
+           'School_Mean', 'School_Std', 'School_Count']
+X = df_ml[features]
+y_optimal = df_ml['Optimal_Production']
+y_over = df_ml['Overproduction']
+y_under = df_ml['Underproduction']
+
+X = X.fillna(X.mean())
+
+print(f"2. Training Regression Models...")
+
+# Split data
+X_train, X_test, y_train_opt, y_test_opt = train_test_split(X, y_optimal, test_size=0.3, random_state=42)
+_, _, y_train_over, y_test_over = train_test_split(X, y_over, test_size=0.3, random_state=42)
+_, _, y_train_under, y_test_under = train_test_split(X, y_under, test_size=0.3, random_state=42)
+
+# Train XGBoost for optimal production
+print("Training XGBoost for Optimal Production...")
+xgb_optimal = xgb.XGBRegressor(n_estimators=100, random_state=42)
+xgb_optimal.fit(X_train, y_train_opt)
+
+# Train Random Forest for overproduction
+print("Training Random Forest for Overproduction...")
+rf_over = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_over.fit(X_train, y_train_over)
+
+# Train Random Forest for underproduction
+print("Training Random Forest for Underproduction...")
+rf_under = RandomForestRegressor(n_estimators=100, random_state=42)
+rf_under.fit(X_train, y_train_under)
+
+print(f"\n3. Model Performance:")
+
+# Optimal Production predictions
+y_pred_opt = xgb_optimal.predict(X_test)
+mae_opt = mean_absolute_error(y_test_opt, y_pred_opt)
+print(f"Optimal Production - MAE: {mae_opt:.2f} meals")
+
+# Overproduction predictions
+y_pred_over = rf_over.predict(X_test)
+mae_over = mean_absolute_error(y_test_over, y_pred_over)
+print(f"Overproduction Prediction - MAE: {mae_over:.2f} meals")
+
+# Underproduction predictions
+y_pred_under = rf_under.predict(X_test)
+mae_under = mean_absolute_error(y_test_under, y_pred_under)
+print(f"Underproduction Prediction - MAE: {mae_under:.2f} meals")
+
+# Feature importance
+print(f"\n4. Feature Importance (Optimal Production):")
+feature_importance = pd.DataFrame({
+    'feature': features,
+    'importance': xgb_optimal.feature_importances_
+}).sort_values('importance', ascending=False)
+print(feature_importance)
+
+# Make predictions for all data
+df_ml['Predicted_Optimal'] = xgb_optimal.predict(X)
+df_ml['Predicted_Over'] = rf_over.predict(X)
+df_ml['Predicted_Under'] = rf_under.predict(X)
+
+print(f"\n5. Optimization Summary:")
+current_over = df_ml['Overproduction'].sum()
+current_under = df_ml['Underproduction'].sum()
+predicted_over = df_ml['Predicted_Over'].sum()
+predicted_under = df_ml['Predicted_Under'].sum()
+
+print(f"Current Overproduction: {current_over:.0f} meals")
+print(f"Predicted Overproduction with Model: {predicted_over:.0f} meals")
+print(f"Reduction: {((current_over - predicted_over) / current_over * 100):.1f}%")
+
+print(f"Current Underproduction: {current_under:.0f} meals") 
+print(f"Predicted Underproduction with Model: {predicted_under:.0f} meals")
+print(f"Reduction: {((current_under - predicted_under) / current_under * 100):.1f}%")
