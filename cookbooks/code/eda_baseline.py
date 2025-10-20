@@ -580,3 +580,84 @@ print(f"Reduction: {((current_over - predicted_over) / current_over * 100):.1f}%
 print(f"Current Underproduction: {current_under:.0f} meals") 
 print(f"Predicted Underproduction with Model: {predicted_under:.0f} meals")
 print(f"Reduction: {((current_under - predicted_under) / current_under * 100):.1f}%")
+
+# %%
+print("=== STEP 13 REVISED: OPTIMIZED REGRESSION/XGBOOST WITH BALANCED COST ===")
+
+# Improved feature engineering
+print("1. Enhanced Feature Engineering...")
+
+df_ml_fixed = df_corrected.copy()
+
+# Better temporal features
+df_ml_fixed['DayOfWeek'] = df_ml_fixed['Date'].dt.dayofweek
+df_ml_fixed['DayOfMonth'] = df_ml_fixed['Date'].dt.day
+df_ml_fixed['WeekOfYear'] = df_ml_fixed['Date'].dt.isocalendar().week
+df_ml_fixed['Is_Weekend'] = (df_ml_fixed['DayOfWeek'] >= 5).astype(int)
+
+# One-hot encoding for weekdays (better than binary flags)
+weekday_dummies = pd.get_dummies(df_ml_fixed['Weekday'], prefix='Day')
+df_ml_fixed = pd.concat([df_ml_fixed, weekday_dummies], axis=1)
+
+# Check which weekday columns actually exist
+print("All columns in dataframe:")
+print(df_ml_fixed.columns.tolist())
+
+# Check specifically for Day_ columns
+day_columns = [col for col in df_ml_fixed.columns if col.startswith('Day_')]
+print(f"Day columns found: {day_columns}")
+
+# School-level features (but avoid dominance)
+school_stats = df_ml_fixed.groupby('School_Name').agg({
+    'Served_Total': ['mean', 'std', 'min', 'max']
+}).reset_index()
+school_stats.columns = ['School_Name', 'School_Mean', 'School_Std', 'School_Min', 'School_Max']
+df_ml_fixed = df_ml_fixed.merge(school_stats, on='School_Name', how='left')
+
+# Remove school mean dominance by using percentiles instead
+df_ml_fixed['School_Percentile'] = df_ml_fixed.groupby('School_Name')['Served_Total'].rank(pct=True)
+
+# Lag features (previous day consumption)
+df_ml_fixed = df_ml_fixed.sort_values(['School_Name', 'Date'])
+df_ml_fixed['Prev_Day_Consumption'] = df_ml_fixed.groupby('School_Name')['Served_Total'].shift(1)
+df_ml_fixed['Consumption_Change'] = df_ml_fixed['Served_Total'] - df_ml_fixed['Prev_Day_Consumption']
+
+# Rolling averages (3-day and 7-day)
+df_ml_fixed['Rolling_Avg_3day'] = df_ml_fixed.groupby('School_Name')['Served_Total'].rolling(3, min_periods=1).mean().reset_index(0, drop=True)
+df_ml_fixed['Rolling_Std_3day'] = df_ml_fixed.groupby('School_Name')['Served_Total'].rolling(3, min_periods=1).std().reset_index(0, drop=True)
+
+# Target variables
+df_ml_fixed['Overproduction'] = np.maximum(0, df_ml_fixed['Offered_Total'] - df_ml_fixed['Served_Total'])
+df_ml_fixed['Underproduction'] = np.maximum(0, df_ml_fixed['Served_Total'] - df_ml_fixed['Offered_Total'])
+df_ml_fixed['Optimal_Production'] = df_ml_fixed['Served_Total'] * 1.12
+
+print(f"Enhanced features prepared: {len(df_ml_fixed)} records")
+
+# Prepare feature matrix with only available features
+base_features = [
+    'DayOfWeek', 'DayOfMonth', 'WeekOfYear', 'Is_Weekend',
+    'School_Std', 'School_Percentile', 'Prev_Day_Consumption', 
+    'Consumption_Change', 'Rolling_Avg_3day', 'Rolling_Std_3day'
+]
+
+# Use only the Day_ columns that actually exist
+features_fixed = base_features + day_columns
+print(f"Final features being used: {features_fixed}")
+
+X_fixed = df_ml_fixed[features_fixed]
+y_optimal_fixed = df_ml_fixed['Optimal_Production']
+y_over_fixed = df_ml_fixed['Overproduction']
+y_under_fixed = df_ml_fixed['Underproduction']
+
+X_fixed = X_fixed.fillna(X_fixed.mean())
+
+print(f"2. Training Optimized Models with Balanced Cost Function...")
+
+# Split data for all targets
+X_train_fixed, X_test_fixed, y_train_opt_fixed, y_test_opt_fixed = train_test_split(
+    X_fixed, y_optimal_fixed, test_size=0.3, random_state=42
+)
+
+# Also split for over/underproduction targets
+_, _, y_train_over_fixed, y_test_over_fixed = train_test_split(X_fixed, y_over_fixed, test_size=0.3, random_state=42)
+_, _, y_train_under_fixed, y_test_under_fixed = train_test_split(X_fixed, y_under_fixed, test_size=0.3, random_state=42)
