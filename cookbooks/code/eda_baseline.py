@@ -476,3 +476,10 @@ print("• Chart 5: 82.0% demand met rate with significant over/underproduction"
 print("• Chart 6: Tuesday has highest waste reduction potential (32.9 meals)")
 
 # %%
+print("=== STEP 13: REGRESSION/XGBOOST FOR PRODUCTION OPTIMIZATION ===")
+
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+import xgboost as xgb
+
