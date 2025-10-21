@@ -17,7 +17,7 @@ forecast_days = st.sidebar.slider("Forecast next (days)", 5, 30, 7)
 # === LOAD DATA ===
 @st.cache_data
 def load_data():
-    df = pd.read_csv("/Users/chayachandana/Downloads/dataset.csv")  # Replace with your dataset
+    df = pd.read_csv("//Users/chayachandana/Desktop/combined breakfast and lunch.csv")  # Replace with your dataset
     df["Date"] = pd.to_datetime(df["Date"])
     return df
 
