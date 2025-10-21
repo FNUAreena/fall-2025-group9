@@ -12,7 +12,7 @@ st.caption("AI-driven insights for FCPS meal demand forecasting and food waste r
 @st.cache_data
 def load_data():
     # Replace with your FCPS dataset
-    df = pd.read_csv("fcps_meal_data.csv")
+    df = pd.read_csv("/Users/chayachandana/Downloads/dataset.csv")
     df["Date"] = pd.to_datetime(df["Date"])
     df["Weekday"] = df["Date"].dt.day_name()
     return df
