@@ -22,11 +22,11 @@ df = load_data()
 # === SIDEBAR FILTERS ===
 st.sidebar.header("Filters")
 school = st.sidebar.selectbox("Select School", ["All"] + sorted(df["School_Name"].unique().tolist()))
-session = st.sidebar.multiselect("Select Session", sorted(df["Session"].unique().tolist()), default=["Lunch"])
+Session = st.sidebar.multiselect("Select session", sorted(df["session"].unique().tolist()), default=["Lunch"])
 
 if school != "All":
     df = df[df["School_Name"] == school]
-df = df[df["Session"].isin(session)]
+df = df[df["session"].isin(Session)]
 
 # === SECTION 1: DEMAND EXPLORER ===
 st.markdown("## 📊 Student Demand Explorer")
@@ -76,7 +76,7 @@ st.markdown(f"💰 **Estimated Monthly Savings:** ~${cost_saved:,.0f}")
 # === VISUAL COMPARISON ===
 st.markdown("### 🧾 Waste Comparison by Session")
 waste_summary = (
-    df.groupby("Session")[["Waste", "Optimized_Waste"]]
+    df.groupby("session")[["Waste", "Optimized_Waste"]]
     .mean()
     .sort_values("Waste", ascending=False)
 )
@@ -96,6 +96,6 @@ st.info(f"""
 
 # === SECTION 4: DOWNLOAD CENTER ===
 st.markdown("## ⬇️ Download Optimized Data")
-opt_data = df[["Date", "School_Name", "Session", "Served_Total", "Optimal_Production", "Optimized_Waste"]]
+opt_data = df[["Date", "School_Name", "session", "Served_Total", "Optimal_Production", "Optimized_Waste"]]
 csv = opt_data.to_csv(index=False).encode("utf-8")
 st.download_button("Download Optimized Plan (CSV)", csv, "optimized_meal_plan.csv", "text/csv")
