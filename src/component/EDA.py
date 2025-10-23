@@ -57,7 +57,6 @@ print("\n=== Variance Inflation Factor (VIF) Scores ===")
 print(vif_data)
 
 # %%
-
 X_svd = df[["level", "fcps_region", "session", 
             "served_total", "planned_total", 
             "discarded_total", "left_over_total"]]
