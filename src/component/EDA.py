@@ -7,24 +7,23 @@ from sklearn.preprocessing import LabelEncoder
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.decomposition import TruncatedSVD
 from numpy.linalg import svd
+from utils import preprocessing
 
-df = pd.read_csv("/Users/chayachandana/Downloads/Production_data.csv")
+df = pd.read_csv("Data/Output/meals_combined.csv")
+
+preprocessed_data = preprocessing(df)
 
 #%%
 cols = [
-    "production_cost_total", "level", "fcps_region", "session",
+    "production_cost_total", "meal_type",
     "served_total", "planned_total", "discarded_total", "left_over_total"
 ]
 df = df[cols].copy()
 
-df.dropna(inplace=True)
-
-if df['discarded_total'].dtype == 'object':
-    df['discarded_total'] = df['discarded_total'].str.replace('%', '', regex=False)
-    df['discarded_total'] = pd.to_numeric(df['discarded_total'], errors='coerce') / 100.0
+df.fillna(method="ffill", inplace=True)
 
 label_encoders = {}
-for col in ["level", "fcps_region", "session"]:
+for col in ["meal_type"]:
     le = LabelEncoder()
     df[col] = le.fit_transform(df[col].astype(str))
     label_encoders[col] = le
@@ -46,7 +45,7 @@ plt.show()
 
 #%%
 
-X = df[["level", "fcps_region", "session",
+X = df[["meal_type",
         "served_total", "planned_total", "discarded_total", "left_over_total"]].astype(float)
 
 vif_data = pd.DataFrame()
@@ -57,7 +56,7 @@ print("\n=== Variance Inflation Factor (VIF) Scores ===")
 print(vif_data)
 
 # %%
-X_svd = df[["level", "fcps_region", "session", 
+X_svd = df[["meal_type", 
             "served_total", "planned_total", 
             "discarded_total", "left_over_total"]]
 
