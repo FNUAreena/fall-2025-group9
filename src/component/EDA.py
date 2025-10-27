@@ -11,6 +11,37 @@ from utils import preprocessing
 
 df = pd.read_csv("Data/Output/meals_combined.csv")
 
+#%%
+# Outlier Detection for 'production_cost_total' 
+
+def clean_currency(x):
+    if isinstance(x, str):
+        return float(x.replace("$", "").replace(",", "").strip())
+    return x
+df["production_cost_total"] = df["production_cost_total"].apply(clean_currency)
+
+
+plt.hist(df["production_cost_total"].dropna(), bins=30, color='skyblue', edgecolor='black')
+plt.show()
+
+#%%
+
+# Outlier Removal using IQR method
+
+threshold = df["production_cost_total"].quantile(0.99)
+outliers = df[df["production_cost_total"] > threshold]
+no_outliers = df[df["production_cost_total"] <= threshold]
+
+plt.hist(no_outliers["production_cost_total"], bins=30, color='skyblue', edgecolor='black')
+plt.show()
+
+#%%
+
+# Top 5 outliers
+print(outliers.sort_values(by="production_cost_total", ascending=False)["production_cost_total"].iloc[:5])
+
+#%%
+
 preprocessed_data = preprocessing(df)
 
 #%%
