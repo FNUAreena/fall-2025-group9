@@ -67,12 +67,12 @@ test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False, collate_fn=c
 
 MODEL_TYPE = "LSTM"
 INPUT_DIM = len(features)
-HIDDEN_DIM = 128
-NUM_LAYERS = 3
+HIDDEN_DIM = 256
+NUM_LAYERS = 4
 OUTPUT_DIM = 1
-DROPOUT = 0.2
+DROPOUT = 0.25
 LEARNING_RATE = 0.001
-EPOCHS = 40
+EPOCHS = 60
 
 model = ForecastingModel(MODEL_TYPE, INPUT_DIM, HIDDEN_DIM, NUM_LAYERS, OUTPUT_DIM, DROPOUT)
 criterion = nn.MSELoss()
