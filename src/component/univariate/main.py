@@ -165,5 +165,3 @@ plt.title(f"{MODEL_TYPE} Predicted vs Actual")
 plt.grid(True)
 plt.savefig(f"univariate/plots/{MODEL_TYPE}.png")
 plt.show()
-
-
