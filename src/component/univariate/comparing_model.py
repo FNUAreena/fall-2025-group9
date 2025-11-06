@@ -188,4 +188,4 @@ for name, mse, rmse, r2 in results:
     print(f"{name:12s}  MSE={mse:.2f}  RMSE={rmse:.2f}  R²={r2:.3f}")
 
 print("\n All models trained and saved successfully.")
-# %%
+
