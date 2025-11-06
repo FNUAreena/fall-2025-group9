@@ -50,7 +50,7 @@ mse_lr = mean_squared_error(y_test_tab, y_pred_lr)
 r2_lr  = r2_score(y_test_tab, y_pred_lr)
 mae_lr = mean_absolute_error(y_test_tab, y_pred_lr)
 print(f"Linear Regression → MSE: {mse_lr:.4f}, R²: {r2_lr:.4f}, MAE: {mae_lr:.4f}")
-lr_filepath = f"results/linear_regression.pkl"
+lr_filepath = f"multivariate/results/linear_regression.pkl"
 with open(lr_filepath, "wb") as f:
     pickle.dump(lr_model, f)
 print(f"Saved LR model to {lr_filepath}")
@@ -65,7 +65,7 @@ plt.ylabel("Predicted Production Cost (LR)")
 plt.title("Linear Regression: Predicted vs Actual")
 plt.grid(True)
 plt.legend()
-plot_lr_path = f"plots/linear_regression.png"
+plot_lr_path = f"multivariate/plots/linear_regression.png"
 plt.savefig(plot_lr_path, bbox_inches='tight', dpi=300)
 plt.close()
 
@@ -77,7 +77,7 @@ mse_xgb = mean_squared_error(y_test_tab, y_pred_xgb)
 r2_xgb  = r2_score(y_test_tab, y_pred_xgb)
 mae_xgb = mean_absolute_error(y_test_tab, y_pred_xgb)
 print(f"XGBoost → MSE: {mse_xgb:.4f}, R²: {r2_xgb:.4f}, MAE: {mae_xgb:.4f}")
-xgb_filepath = f"results/xgboost_model.json"
+xgb_filepath = f"multivariate/results/xgboost_model.json"
 xgb_model.save_model(xgb_filepath)
 
 plt.figure(figsize=(6,6))
@@ -90,7 +90,7 @@ plt.ylabel("Predicted Production Cost (XGBoost)")
 plt.title("XGBoost: Predicted vs Actual")
 plt.grid(True)
 plt.legend()
-plot_xgb_path = f"plots/xgboost_model.png"
+plot_xgb_path = f"multivariate/plots/xgboost_model.png"
 plt.savefig(plot_xgb_path, bbox_inches='tight', dpi=300)
 plt.close()
 
@@ -121,7 +121,7 @@ mse_fnn = mean_squared_error(y_test_tab, y_pred_fnn)
 r2_fnn  = r2_score(y_test_tab, y_pred_fnn)
 mae_fnn = mean_absolute_error(y_test_tab, y_pred_fnn)
 print(f"FNN → MSE: {mse_fnn:.4f}, R²: {r2_fnn:.4f}, MAE: {mae_fnn:.4f}")
-fnn_filepath = f"results/fnn_model.pth"
+fnn_filepath = f"multivariate/results/fnn_model.pth"
 torch.save(fnn_model.state_dict(), fnn_filepath)
 
 plt.figure(figsize=(6,6))
@@ -134,7 +134,7 @@ plt.ylabel("Predicted Production Cost (FNN)")
 plt.title("FNN: Predicted vs Actual")
 plt.grid(True)
 plt.legend()
-plot_fnn_path = f"plots/fnn_model.png"
+plot_fnn_path = f"multivariate/plots/fnn_model.png"
 plt.savefig(plot_fnn_path, bbox_inches='tight', dpi=300)
 plt.close()
 
@@ -219,7 +219,7 @@ print(f"MSE: {mse:.4f}")
 print(f"R²: {r2:.4f}")
 print(f"MAE: {mae:.4f}")
 
-torch.save(model.state_dict(), f"results/{MODEL_TYPE}.pth")
+torch.save(model.state_dict(), f"multivariate/results/{MODEL_TYPE}.pth")
 
 plt.figure(figsize=(6,6))
 plt.scatter(y_true_all, y_pred_all, alpha=0.6, label="Predicted vs Actual")
@@ -231,5 +231,5 @@ plt.ylabel("Predicted Production Cost")
 plt.title(f"{MODEL_TYPE} Predicted vs Actual")
 plt.grid(True)
 plt.legend()
-plt.savefig(f"plots/{MODEL_TYPE}.png", bbox_inches='tight', dpi=300)
+plt.savefig(f"multivariate/plots/{MODEL_TYPE}.png", bbox_inches='tight', dpi=300)
 plt.show()
