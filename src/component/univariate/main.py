@@ -166,5 +166,4 @@ plt.grid(True)
 plt.savefig(f"univariate/plots/{MODEL_TYPE}.png")
 plt.show()
 
-#%%
 
