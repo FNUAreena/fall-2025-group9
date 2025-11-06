@@ -27,7 +27,7 @@ TARGET_COL = "production_cost_total"
 
 WINDOW     = 7          
 ASPLIT     = 0.7         
-MODEL_TYPE = "LSTM"      
+MODEL_TYPE = "GRU"      
 HIDDEN_DIM = 256
 INPUT_DIM  = 1
 NUM_LAYERS = 4
