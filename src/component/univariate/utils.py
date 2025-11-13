@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import Dataset
 
 # -------------------- Reproducibility --------------------
+
 def seed_everything(seed: int = 42):
     random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -15,6 +16,7 @@ def seed_everything(seed: int = 42):
     torch.backends.cudnn.benchmark = False
 
 # -------------------- Cleaning helpers --------------------
+
 def _coerce_currency_column(col: pd.Series) -> pd.Series:
     """
     Convert messy currency strings to float.
@@ -33,6 +35,7 @@ def _coerce_currency_column(col: pd.Series) -> pd.Series:
     return col.apply(parse_cell).astype(float)
 
 # -------------------- Date parsing --------------------
+    
 def _parse_dates(series: pd.Series, dayfirst="auto") -> pd.Series:
     """
     Parse a date column robustly.
@@ -80,6 +83,7 @@ def _pick_target_column(df: pd.DataFrame):
     return best
 
 # -------------------- Data loading & aggregation --------------------
+    
 def load_and_aggregate_district(
     CSV_PATH: str,
     DATE_COL: str = None,
@@ -152,6 +156,7 @@ def load_and_aggregate_district(
     return dates, values, DATE_COL, TARGET_COL
 
 # -------------------- Dataset & splitting --------------------
+
 class TimeSeriesDataset(Dataset):
     """Sliding-window dataset: last WINDOW values -> next value."""
     def __init__(self, data_2d, window: int):

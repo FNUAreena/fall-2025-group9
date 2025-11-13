@@ -19,6 +19,7 @@ from utils import (
     seed_everything, TimeSeriesDataset, safe_time_split, load_and_aggregate_district
 )
 from model import ForecastingModel
+from forecasting import forecast_future_dates
 
 CSV_PATH   = "Data/Output/meals_combined.csv"
 
@@ -27,7 +28,7 @@ TARGET_COL = "production_cost_total"
 
 WINDOW     = 7          
 ASPLIT     = 0.7         
-MODEL_TYPE = "GRU"      
+MODEL_TYPE = "LSTM"      
 HIDDEN_DIM = 256
 INPUT_DIM  = 1
 NUM_LAYERS = 4
@@ -165,3 +166,23 @@ plt.title(f"{MODEL_TYPE} Predicted vs Actual")
 plt.grid(True)
 plt.savefig(f"univariate/plots/{MODEL_TYPE}.png")
 plt.show()
+
+
+
+# Forecast future dates using the trained model
+
+forecast_df = forecast_future_dates(
+    csv_path=CSV_PATH,
+    date_col=DATE_COL,
+    target_col=TARGET_COL,
+    window=WINDOW,
+    asplit=ASPLIT,       # include if your function expects it
+    k_steps=10,          # <- use k_steps
+    model_type=MODEL_TYPE,
+    model_path=f"univariate/results/{MODEL_TYPE}.pth",
+    hidden_dim=HIDDEN_DIM,
+    num_layers=NUM_LAYERS,
+    dropout=DROPOUT,
+)
+
+print(forecast_df.head())
