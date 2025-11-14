@@ -1,11 +1,4 @@
 
-# Capstone Proposal
-## Smart School Food Service Analytics: AI-Driven Demand Forecasting and Waste Reduction using Fairfax County Public Schools Data
-### Proposed by: Dr. Amir Jafari
-#### Email: ajafari@gwu.edu
-#### Advisor: Amir Jafari
-#### The George Washington University, Washington DC  
-#### Data Science Program
 
 
 ## 1 Objective:  
