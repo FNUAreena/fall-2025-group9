@@ -10,49 +10,71 @@ from utils import seed_everything, TimeSeriesDataset, load_and_aggregate_distric
 from model import ForecastingModel
 
 
-# Hyperparameters
+# Hyperparameters (defaults; can be overridden via function args)
 CSV_PATH = "Data/Output/meals_combined.csv"
 DATE_COL = "date"
-TARGET_COL= "production_cost_total"
+TARGET_COL = "production_cost_total"
 
 MODEL_TYPE = "LSTM"
-HIDDEN_DIM = 256   
-NUM_LAYERS = 4  
-DROPOUT= 0.25 
-WINDOW = 7 
+HIDDEN_DIM = 256
+NUM_LAYERS = 4
+DROPOUT = 0.25
+WINDOW = 7
 ASPLIT = 0.7
 K_STEPS = 10
 
 MODEL_PATH = "univariate/results/LSTM.pth"
+
 
 def next_days(last_date: pd.Timestamp, k: int) -> pd.DatetimeIndex:
     """Return the next k business days after last_date."""
     start = pd.to_datetime(last_date) + pd.offsets.BDay(1)
     return pd.bdate_range(start, periods=k)
 
+
 def last_date_from_dates_array(dates_array) -> pd.Timestamp:
-    """Get the last date from a numpy array of dates."""
+    """Get the last date from a numpy array of dates.
+
+    Handles both simple datetime arrays and tuples like
+    (school_name, meal_type, Timestamp).
+    """
     last_item = dates_array[-1]
     if isinstance(last_item, tuple) and len(last_item) >= 3:
         return pd.to_datetime(last_item[2])
     return pd.to_datetime(last_item)
 
+
 def forecast_future_dates(
-        csv_path: str = CSV_PATH,
-        date_col: str = DATE_COL,
-        target_col: str = TARGET_COL,
-        window: int = WINDOW,
-        asplit: float = ASPLIT,
-        k_steps: int = K_STEPS,
-        model_type: str = MODEL_TYPE,
-        model_path: str = MODEL_PATH,
-        hidden_dim: int = HIDDEN_DIM,
-        num_layers: int = NUM_LAYERS,
-        dropout: float = DROPOUT,
+    csv_path: str = CSV_PATH,
+    date_col: str = DATE_COL,
+    target_col: str = TARGET_COL,
+    window: int = WINDOW,
+    asplit: float = ASPLIT,
+    k_steps: int = K_STEPS,
+    model_type: str = MODEL_TYPE,
+    model_path: str = MODEL_PATH,
+    hidden_dim: int = HIDDEN_DIM,
+    num_layers: int = NUM_LAYERS,
+    dropout: float = DROPOUT,
+    school_name=None,
+    meal_type=None,
 ) -> pd.DataFrame:
-    
-    """Forecast the next k_steps future dates using a trained model."""
-    # Load and aggregate data
+    """Forecast the next k_steps of production cost for a given school and meal type.
+
+    This function:
+    1. Loads the aggregated (school, meal, date) series from CSV.
+    2. Filters to the requested (school_name, meal_type).
+    3. Recomputes the train split and scaler just like in main.py.
+    4. Loads the trained LSTM for that school+meal.
+    5. Generates k_steps future daily forecasts (business days).
+    """
+
+    if school_name is None or meal_type is None:
+        raise ValueError("You must pass both school_name and meal_type to forecast_future_dates.")
+
+    # ------------------------------------------------------------------
+    # Load and aggregate data at (school, meal, date) level
+    # ------------------------------------------------------------------
     dates, values, _, _ = load_and_aggregate_district(
         CSV_PATH=csv_path,
         DATE_COL=date_col,
@@ -62,19 +84,55 @@ def forecast_future_dates(
     )
 
     if len(values) < window + 1:
-        raise ValueError(f"Series too short (n={len(values)}) for WINDOW={window}.")
+        raise ValueError(f"Overall series too short (n={len(values)}) for WINDOW={window}.")  # unlikely
 
-    # Recompute split and fit scaler on train only (exactly like main.py)
-    split_idx = safe_time_split(values, asplit, window)
-    train_raw = values[:split_idx]  # shape (T_train, 1)
+    # Rebuild tidy DataFrame
+    records = []
+    for (school, meal, dt), v in zip(dates, values.reshape(-1)):
+        records.append((school, meal, pd.to_datetime(dt), float(v)))
+
+    df_series = pd.DataFrame(records, columns=["school_name", "meal_type", date_col, target_col])
+    df_series = df_series.sort_values(["school_name", "meal_type", date_col]).reset_index(drop=True)
+
+    # Filter for the requested school and meal
+    df_sm = df_series[
+        (df_series["school_name"] == school_name) & (df_series["meal_type"] == meal_type)
+    ].copy()
+
+    if df_sm.empty:
+        raise ValueError(f"No data found for school={school_name!r}, meal_type={meal_type!r}")
+
+    values_sm = df_sm[target_col].values.astype("float32").reshape(-1, 1)
+    dates_sm  = df_sm[date_col].values
+
+    if len(values_sm) < window + 1:
+        raise ValueError(
+            f"Series for {school_name!r}/{meal_type!r} too short (n={len(values_sm)}) for WINDOW={window}."
+        )
+
+    # ------------------------------------------------------------------
+    # Recompute split and fit scaler on train only (same logic as main.py)
+    # ------------------------------------------------------------------
+    split_idx = safe_time_split(values_sm, asplit, window)
+    train_raw = values_sm[:split_idx]
 
     scaler = MinMaxScaler()
     scaler.fit(train_raw)
-    full_scaled = scaler.transform(values).ravel()
+    full_scaled = scaler.transform(values_sm).ravel()
 
-    # Load trained weights
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Saved model not found: {model_path}")
+    # ------------------------------------------------------------------
+    # Load the trained model weights for this school+meal
+    # ------------------------------------------------------------------
+    school_safe = str(school_name).replace(" ", "_").replace("/", "_")
+    meal_safe   = str(meal_type).replace(" ", "_").replace("/", "_")
+    base_dir = os.path.dirname(model_path) or "."
+    model_file = f"{model_type}_{school_safe}_{meal_safe}.pth"
+    model_path_effective = os.path.join(base_dir, model_file)
+
+    if not os.path.exists(model_path_effective):
+        raise FileNotFoundError(
+            f"Saved model not found for {school_name!r}/{meal_type!r}: {model_path_effective}"
+        )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = ForecastingModel(
@@ -85,37 +143,42 @@ def forecast_future_dates(
         output_dim=1,
         dropout=dropout,
     ).to(device)
-    state = torch.load(model_path, map_location=device)
+
+    state = torch.load(model_path_effective, map_location=device)
     model.load_state_dict(state)
     model.eval()
 
-    # Forecast next K steps in scaled space, then inverse-transform
-    last = full_scaled[-window:].astype(np.float32).copy()
+    # ------------------------------------------------------------------
+    # Forecast next k_steps in scaled space, then inverse-transform
+    # ------------------------------------------------------------------
+    last_window = full_scaled[-window:].astype(np.float32).copy()
     preds_scaled = []
+
     with torch.no_grad():
         for _ in range(k_steps):
-            xb = torch.from_numpy(last).view(1, window, 1).to(device)
+            xb = torch.from_numpy(last_window).view(1, window, 1).to(device)
             yhat = model(xb).detach().cpu().numpy().reshape(-1)[0]
             preds_scaled.append(yhat)
-            last = np.roll(last, -1)
-            last[-1] = yhat
+            last_window = np.roll(last_window, -1)
+            last_window[-1] = yhat
 
     preds = scaler.inverse_transform(np.array(preds_scaled).reshape(-1, 1)).ravel()
 
-    # Use the calendar date of the last observed tuple to generate future business dates
-    last_date = last_date_from_dates_array(dates)
+    # Compute future dates starting from last actual date in this series
+    last_date = df_sm[date_col].max()
     fdates = next_days(last_date, k_steps)
 
     out = pd.DataFrame(
         {
+            "school_name": school_name,
+            "meal_type": meal_type,
             "forecast_date": fdates,
             "step_ahead": np.arange(1, k_steps + 1),
             target_col: preds,
         }
     )
-    print(f"forecasting: {len(out)} rows")
+    print(f"forecasting: {len(out)} rows for {school_name!r} / {meal_type!r}")
     return out
-
 
 if __name__ == "__main__":
     df = forecast_future_dates()
