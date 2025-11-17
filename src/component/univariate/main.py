@@ -34,7 +34,7 @@ TARGET_COL = "production_cost_total"
 # Model and training hyperparameters
 WINDOW     = 3
 ASPLIT     = 0.6
-MODEL_TYPE = "LSTM"
+MODEL_TYPE = "GRU"
 HIDDEN_DIM = 256
 INPUT_DIM  = 1
 OUTPUT_DIM = 1
@@ -255,6 +255,7 @@ print("\nAll school / meal models trained.\n")
 
 # Forecast future dates for each school+meal")
 
+"""
 os.makedirs("univariate/results", exist_ok=True)
 
 all_forecasts = []
@@ -301,3 +302,5 @@ if len(all_forecasts) > 0:
     print(f"\n[saved] Combined 10-day forecasts for all schools/meals -> {output_path}")
 else:
     print("\n[warn] No forecasts were generated. Check training/forecast logs.")
+
+"""
