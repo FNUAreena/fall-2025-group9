@@ -22,26 +22,26 @@ An AI-powered food service analytics platform designed to help Fairfax County Pu
 
 ---
 
-# 📋 Table of Contents
+## 📋 Table of Contents
 
-- Overview  
-- Dataset Workflow  
-- Key Features  
-- System Architecture  
-- Model Pipeline  
-- Getting Started  
-- Prerequisites  
-- Installation  
-- Environment Setup  
-- Running the Models  
-- Streamlit Dashboard  
-- API / Model Endpoints  
-- Troubleshooting  
-- Research & Performance  
-- Technology Stack  
-- Contributing  
-- License  
-- Acknowledgments  
+- [Overview](#overview)  
+- [Dataset Workflow](#dataset-workflow)  
+- [Key Features](#key-features)  
+- [System Architecture](#system-architecture)  
+- [Model Pipeline](#model-pipeline)  
+- [Getting Started](#getting-started)  
+- [Prerequisites](#prerequisites)  
+- [Installation](#installation)  
+- [Environment Setup](#environment-setup)  
+- [Running the Models](#running-the-models)  
+- [Dashboard (Streamlit App)](#dashboard-streamlit-app)  
+- [API Endpoints](#api-endpoints)  
+- [Troubleshooting](#troubleshooting)  
+- [Research & Performance](#research--performance)  
+- [Technology Stack](#technology-stack)  
+- [Contributing](#contributing)  
+- [License](#license)  
+- [Acknowledgments](#acknowledgments)
 
 ---
 
