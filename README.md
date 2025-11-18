@@ -233,6 +233,7 @@ Install:
 git clone https://github.com/FNUAreena/fall-2025-group9
 cd fall-2025-group9
 pip install -r requirements.txt
+```
 
 🌱 Environment Setup
 Important source files:
