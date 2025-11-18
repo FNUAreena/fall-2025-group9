@@ -167,6 +167,7 @@ Univariate   Multivariate     Benchmark
 
 
 ---
+```
 
 # 🤖 Model Pipeline
 
