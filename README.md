@@ -235,5 +235,5 @@ cd fall-2025-group9
 pip install -r requirements.txt
 ```
 
-🌱 Environment Setup
+## 🌱 Environment Setup
 Important source files:
