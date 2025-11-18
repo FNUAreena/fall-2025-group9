@@ -138,6 +138,7 @@ Your pipeline transforms raw FCPS Production Records + POS data → **clean, str
 
 ## 🏗️ System Architecture
 
+```text
 ┌──────────────────────────┐
 │    Raw FCPS HTML Files   │
 └───────────────┬──────────┘
