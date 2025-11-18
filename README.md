@@ -238,7 +238,3 @@ pip install -r requirements.txt
 ## 🌱 Environment Setup
 Important source files:
 
-src/utils.py
-src/model.py
-src/forecasting.py
-
