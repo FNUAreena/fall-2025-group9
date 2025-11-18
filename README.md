@@ -40,7 +40,7 @@ An AI-powered food service analytics platform designed to help Fairfax County Pu
 - [System Architecture](#system-architecture)  
 - [Model Pipeline](#model-pipeline)  
 - [Getting Started](#getting-started)  
-- [Prerequisites](#prerequisites)  
+    - [Prerequisites](#prerequisites)  
 - [Installation](#installation)  
 - [Environment Setup](#environment-setup)  
 - [Running the Models](#running-the-models)  
