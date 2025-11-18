@@ -60,4 +60,75 @@ Your pipeline transforms raw FCPS Production Records + POS data into a clean, st
 
 **Outputs:**
 
+breakfast_combined.csv
+lunch_combined.csv
+meals_combined.csv
+
+
+---
+
+### **2. Data Cleaning & Preprocessing (`utils.preprocess`)**
+
+✔ Converts `$` & `%` → float  
+✔ Converts dates  
+✔ Handles missing values (forward/backward fill)  
+✔ Removes extreme outliers using 99th percentile  
+✔ Encodes meal types  
+✔ Produces final dataset for:
+
+- Univariate forecasting  
+- Multivariate forecasting  
+- Dashboard visualizations  
+
+---
+
+## ⭐ Final Dataset
+
+| Column | Description |
+|--------|-------------|
+| school_name | FCPS school |
+| meal_type | breakfast / lunch |
+| date | daily record |
+| served_total | meals served |
+| planned_total | planned meals |
+| discarded_total | wasted meals |
+| left_over_total | leftovers |
+| production_cost_total | total cost for that day |
+
+---
+
+## 🎯 Key Features
+
+### 🍽️ 1. Meal Demand Forecasting  
+- LSTM & GRU deep learning models  
+- Univariate time series  
+- Multivariate cost prediction  
+
+### ♻️ 2. Waste Optimization  
+- Leftover prediction  
+- Waste ratio analytics  
+- Identify high-waste menu items  
+
+### 💲 3. Cost Forecasting  
+- 10-day ahead forecasting  
+- Scenario-based cost estimation  
+
+### 📊 4. Streamlit Dashboard  
+- School-wise filters  
+- Cost trends  
+- Waste analytics  
+- What-if scenarios  
+
+### 🧠 5. Machine Learning Benchmarking  
+- Linear Regression  
+- XGBoost  
+- Feed-Forward NN  
+- GRU/LSTM  
+
+---
+
+## 🏗️ System Architecture
+
+
+
 
