@@ -254,13 +254,9 @@ python preprocess_html.py
 This script:
 
 - Reads FCPS breakfast & lunch HTML production records
-
 - Extracts → served, planned, discarded, leftover, cost
-
 - Cleans currency & % values
-
 - Standardizes headers
-
 - Generates:
 
 ```
@@ -294,14 +290,14 @@ univariate/plots/
 cd src/multivariate
 python main.py
 ```
-Uses features:
-served_total
-planned_total
-discarded_total
-left_over_total
-And predicts:
+- Uses features:
+- served_total
+- planned_total
+- discarded_total
+- left_over_total
+- And predicts:
 production_cost_total
-Models saved to:
+- Models saved to:
 
 ```
 multivariate/results/
@@ -314,13 +310,14 @@ multivariate/plots/
 cd src/univariate
 python comparing_model.py
 ```
+
 This evaluates:
-Linear Regression
-XGBoost
-Feed-Forward Neural Network
-LSTM
-GRU
-Outputs saved into:
+- Linear Regression
+- XGBoost
+- Feed-Forward Neural Network
+- LSTM
+- GRU
+- Outputs saved into:
 
 ```
 univariate/results/
