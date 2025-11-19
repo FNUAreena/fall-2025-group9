@@ -343,16 +343,24 @@ streamlit run app_dashboard_nav.py
 ```
 
 ### 🔍 Includes
+
 ✔ School-wise analysis
+
 ✔ Waste heatmap
+
 ✔ What-if prediction sliders
+
 ✔ LSTM vs GRU comparison
+
 ✔ Loss-making school detection
+
 ✔ Forecast charts by date & school
 
 # 📡 API Endpoints (Internal Functions)
+
 Our project does not expose a public API, but the dashboard + Python scripts rely on reusable ML functions.
 📌 Core Internal APIs (Functions)
+
 Function	Location	Purpose
 forecast_future_dates()	src/forecasting.py	Predicts k future days of cost using trained LSTM/GRU
 load_and_aggregate_district()	src/utils.py	Loads CSV → cleans → aggregates district totals
