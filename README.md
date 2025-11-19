@@ -245,7 +245,7 @@ src/forecasting.py
 ```
 
 # ▶️ Running the Application
-#1. HTML → CSV Preprocessing
+**1. HTML → CSV Preprocessing
 
 ```
 python src/preprocess_html.py
