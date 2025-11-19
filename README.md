@@ -386,21 +386,97 @@ Although this project does not use external REST APIs, the internal Streamlit da
 
 # 🔧 Troubleshooting
 
-Below is a quick issue–cause–solution table for common problems during preprocessing, training, and running the dashboard.
+Quick solutions to the most common issues:
 
-| **Issue** | **Cause** | **Fix** |
-|----------|-----------|---------|
-| HTML parser creates empty CSVs | Wrong folder path or FCPS HTML structure changed | Verify breakfast/lunch HTML folder paths before running `preprocess_html.py` |
-| Date parsing errors | FCPS date format sometimes inconsistent (day-first ambiguity) | Use: `pd.to_datetime(df['date'], dayfirst=True, errors='coerce')` (already in code) |
-| LSTM/GRU model not loading | Incorrect `.pth` file path or model folder missing | Ensure paths: `univariate/LSTM_models/` / `univariate/GRU_models/` and filenames match |
-| Streamlit dashboard shows blank page | Cached stale data | Run: `streamlit cache clear` |
-| XGBoost import error | Package not installed | Run: `pip install xgboost` |
-| Forecast jumps too high | Outliers affecting scaling | 99th percentile outlier cleaning is included → verify preprocessing step |
-| Model training too slow | Large hidden size (256) impacts training speed | Reduce `HIDDEN_DIM` from 256 → 128 |
-| School forecast returns empty | School name mismatch between CSV and model filename | Ensure model filename uses underscores (e.g., `Aldrin_Elementary`) and CSV uses spaces (`Aldrin Elementary`) |
-| Heatmap shows blank values | `discarded_total` not numeric | Convert using: `pd.to_numeric(..., errors='coerce').fillna(0)` |
-| "Forecast failed" message | Not enough school-specific data or corrupted model | Retrain that school's model OR check that subset CSV has sufficient rows |
-| Streamlit port already in use | Another instance running | Kill port: `lsof -i :8501` → `kill -9 <PID>` |
+| Issue | Cause | Simple Fix |
+|-------|--------|-------------|
+| **Empty CSV after parsing** | Wrong HTML folder path | Check breakfast/lunch folder paths before running `preprocess_html.py` |
+| **Date errors / NaNs** | FCPS dates use mixed formats | Use `dayfirst=True` in `pd.to_datetime()` (already used in code) |
+| **LSTM/GRU model not loading** | Wrong `.pth` path | Ensure model file is inside: `univariate/LSTM_models/` or `univariate/GRU_models/` |
+| **Streamlit blank page** | Cached old data | Run: `streamlit cache clear` |
+| **XGBoost import error** | Not installed | `pip install xgboost` |
+| **Very high forecast values** | Outliers in cost | 99th percentile cleaning already included—recheck preprocessing |
+| **Training too slow** | Model too big | Reduce `HIDDEN_DIM` from 256 → 128 |
+| **Forecast shows empty for a school** | School name mismatch | Filename uses `_` (e.g., `Aldrin_Elementary`), CSV uses spaces → ensure both match |
+| **Heatmap blank** | Non-numeric waste columns | Convert with `pd.to_numeric(errors='coerce').fillna(0)` |
+| **“Forecast failed” error** | Not enough rows for that school | Check if subset CSV has enough data; retrain if needed |
+| **Port already in use (Streamlit)** | Another app running | Run: `lsof -i :8501` → `kill -9 <PID>` |
 
 ---
+## 📊 Research & Performance
+
+This project evaluates multiple machine learning and deep learning models for accurate forecasting of school meal production costs. Both **univariate** and **multivariate** forecasting pipelines were benchmarked.
+
+---
+
+### 🔵 Univariate Forecasting (District-Level Daily Cost)
+
+| **Model** | **MSE** | **RMSE** | **R² Score** |
+|-----------|---------|-----------|---------------|
+| Linear Regression | 39,013.54 | 197.52 | 0.753 |
+| Feed-Forward Neural Network (FNN) | 39,595.32 | 198.99 | 0.749 |
+| XGBoost Regressor | 39,411.85 | 198.52 | 0.750 |
+| LSTM | **39,075.87** | **197.68** | **0.752** |
+| GRU | 42,162.19 | 205.33 | 0.733 |
+
+📌 **Insight:**  
+LSTM delivered the best overall balance of accuracy and stability, outperforming GRU and classical ML models. Linear Regression remains a fast baseline but underfits non-linear time-series trends.
+
+---
+
+### 🔵 Multivariate Forecasting (School-Level Features)
+
+**Features used**
+
+- `served_total`  
+- `planned_total`  
+- `discarded_total`  
+- `left_over_total`  
+
+**Target:**  
+- `production_cost_total`
+
+**Models Evaluated:**
+
+| Model | Performance Summary |
+|--------|---------------------|
+| **GRU** | ⭐ Best overall accuracy; captures sequential patterns across school-days |
+| **LSTM** | Strong performance, competitive with GRU; stable long-range memory |
+| **XGBoost** | High accuracy on tabular data; fast but not sequence-aware |
+| **Feed-Forward Neural Network** | Moderate performance; works as non-sequential baseline |
+| **Linear Regression** | Weak baseline; cannot model non-linear patterns |
+
+📌 **Insight:**  
+Both **Multivariate LSTM and GRU outperform classical ML models**, especially when modeling school-level time dependencies such as changes in served/planned meals each day.
+---
+
+## 📊 Key Findings
+
+- Multivariate models (GRU & LSTM) predicted production cost more accurately because they used operational features such as served, planned, discarded, and leftover meals.
+- Deep learning models (LSTM/GRU) consistently outperformed classical ML models like Linear Regression, XGBoost, and Feed-Forward NN.
+- Schools with high leftover or discarded meals also showed higher production costs, revealing a strong link between food waste and budgeting.
+- School-level forecasting (per-school models) provided more accurate results than district-level forecasting because each school follows its own unique trend.
+- Outlier removal (99th percentile) and currency cleaning improved prediction stability and reduced noise in the dataset.
+- The Streamlit dashboard helped visualize forecast trends, wastage patterns, and school-wise performance, making the system useful for FCPS decision-making.
+- Forecasting showed the potential to reduce meal waste and optimize production planning, leading to better cost management.
+
+
+---
+
+# 🧰 Technology Stack
+
+| Category | Technologies |
+|---------|--------------|
+| 🤖 Machine Learning | PyTorch · XGBoost · Scikit-Learn |
+| 🧠 Deep Learning | LSTM · GRU · FeedForwardNN |
+| 🖥️ Dashboard | Streamlit · Plotly Express |
+| 🧹 Data Processing | Pandas · NumPy · BeautifulSoup · lxml |
+| 📊 Visualization | Matplotlib · Seaborn |
+| 🧪 Evaluation | MSE · RMSE · R² · MAE |
+| 📁 Utilities | Pickle · Glob · Pathlib · OS |
+| 🔧 Version Control | Git · GitHub |
+| 🚀 Deployment | Local Machine · Streamlit Cloud |
+| 💻 Language | Python |
+
+
 
