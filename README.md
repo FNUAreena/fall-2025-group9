@@ -214,9 +214,9 @@ Models:
 
 ---
 
-## 🚀 Getting Started
+## 🚀 **Getting Started**
 
-## ✔️ Prerequisites
+# ✔️ Prerequisites
 Install:
 
 - Python 3.10+  
