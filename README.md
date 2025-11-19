@@ -214,9 +214,9 @@ Models:
 
 ---
 
-## 🚀 **Getting Started**
+# 🚀 Getting Started
 
-# ✔️ Prerequisites
+## ✔️ Prerequisites
 Install:
 
 - Python 3.10+  
@@ -227,7 +227,7 @@ Install:
 
 ---
 
-# 📦 Installation
+## 📦 Installation
 
 ```bash
 git clone https://github.com/FNUAreena/fall-2025-group9
@@ -244,7 +244,7 @@ src/model.py
 src/forecasting.py
 ```
 
-# ▶️ Running the Application
+## ▶️ Running the Application
 **1. HTML → CSV Preprocessing**
 
 ```
