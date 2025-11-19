@@ -268,8 +268,8 @@ Data/Output/meals_combined.csv
 **2. Univariate Forecasting**
 
 ```
-cd src/univariate
-python main.py
+cd src/component
+python univariate/main.py
 ```
 
 This will:
@@ -287,8 +287,8 @@ univariate/plots/
 **3. Multivariate Forecasting**
 
 ```
-cd src/multivariate
-python main.py
+cd src/component
+python multivariate/main.py
 ```
 - Uses features:
 - served_total
@@ -307,8 +307,8 @@ multivariate/plots/
 **4. Model Comparison**
 
 ```
-cd src/univariate
-python comparing_model.py
+cd src/component
+python univariate/comparing_model.py
 ```
 
 This evaluates:
