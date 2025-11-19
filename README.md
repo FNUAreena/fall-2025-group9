@@ -244,26 +244,26 @@ src/model.py
 src/forecasting.py
 ```
 
-▶️ Running the Application
-1. HTML → CSV Preprocessing
+## ▶️ Running the Application
+# 1. HTML → CSV Preprocessing
 
 ```
 python src/preprocess_html.py
 ```
 
-2. Univariate Forecasting
+# 2. Univariate Forecasting
 
 ```
 python src/univariate/main.py
 ```
 
-3. Multivariate Forecasting
+# 3. Multivariate Forecasting
 
 ```
 python src/multivariate/main.py
 ```
 
-4 . Model Comparison
+# 4. Model Comparison
 
 ```
 python src/univariate/comparing_model.py
