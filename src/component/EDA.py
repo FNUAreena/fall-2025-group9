@@ -7,7 +7,6 @@ from sklearn.preprocessing import LabelEncoder
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.decomposition import TruncatedSVD
 from numpy.linalg import svd
-from preprocess import preprocessing 
 
 df = pd.read_csv("Data/Output/meals_combined.csv")
 
@@ -39,10 +38,6 @@ plt.show()
 
 # Top 5 outliers
 print(outliers.sort_values(by="production_cost_total", ascending=False)["production_cost_total"].iloc[:5])
-
-#%%
-
-preprocessed_data = preprocessing(df)
 
 #%%
 cols = [
