@@ -57,7 +57,7 @@ An AI-powered food service analytics platform designed to help Fairfax County Pu
 
 # 🔄 Dataset Workflow
 
-Your pipeline transforms raw FCPS Production Records + POS data → **clean, structured forecasting dataset**.
+Our pipeline transforms raw FCPS Production Records + POS data → **clean, structured forecasting dataset**.
 
 ---
 
