@@ -146,7 +146,7 @@ Your pipeline transforms raw FCPS Production Records + POS data → **clean, str
 
 ---
 
-## 🏗️ System Architecture
+# 🏗️ System Architecture
 
 ```
 ┌──────────────────────────┐
@@ -216,7 +216,7 @@ Models:
 
 # 🚀 Getting Started
 
-## ✔️ Prerequisites
+### ✔️ Prerequisites
 Install:
 
 - Python 3.10+  
@@ -227,7 +227,7 @@ Install:
 
 ---
 
-## 📦 Installation
+### 📦 Installation
 
 ```bash
 git clone https://github.com/FNUAreena/fall-2025-group9
@@ -235,7 +235,7 @@ cd fall-2025-group9
 pip install -r requirements.txt
 ```
 
-## 🌱 Environment Setup
+### 🌱 Environment Setup
 Important source files: 
 
 ```
@@ -244,7 +244,7 @@ src/model.py
 src/forecasting.py
 ```
 
-## ▶️ Running the Application
+### ▶️ Running the Application
 **1. HTML → CSV Preprocessing**
 
 ```
