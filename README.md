@@ -252,10 +252,15 @@ cd src
 python preprocess_html.py
 ```
 This script:
+
 Reads FCPS breakfast & lunch HTML production records
+
 Extracts → served, planned, discarded, leftover, cost
+
 Cleans currency & % values
+
 Standardizes headers
+
 Generates:
 
 ```
