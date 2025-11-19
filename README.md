@@ -248,23 +248,85 @@ src/forecasting.py
 **1. HTML → CSV Preprocessing**
 
 ```
-python src/preprocess_html.py
+cd src
+python preprocess_html.py
+```
+This script:
+Reads FCPS breakfast & lunch HTML production records
+Extracts → served, planned, discarded, leftover, cost
+Cleans currency & % values
+Standardizes headers
+Generates:
+
+```
+Data/Output/breakfast_combined.csv
+Data/Output/lunch_combined.csv
+Data/Output/meals_combined.csv
 ```
 
 **2. Univariate Forecasting**
 
 ```
-python src/univariate/main.py
+cd src/univariate
+python main.py
+```
+This will:
+Aggregate total district production cost per day
+Create sliding windows
+Train LSTM/GRU
+Save model + plots into:
+
+```
+univariate/results/
+univariate/plots/
 ```
 
 **3. Multivariate Forecasting**
 
 ```
-python src/multivariate/main.py
+cd src/multivariate
+python main.py
+```
+Uses features:
+served_total
+planned_total
+discarded_total
+left_over_total
+And predicts:
+production_cost_total
+Models saved to:
+
+```
+multivariate/results/
+multivariate/plots/
 ```
 
 **4. Model Comparison**
 
 ```
-python src/univariate/comparing_model.py
+cd src/univariate
+python comparing_model.py
 ```
+This evaluates:
+Linear Regression
+XGBoost
+Feed-Forward Neural Network
+LSTM
+GRU
+Outputs saved into:
+
+```
+univariate/results/
+univariate/plots/
+```
+
+**5. Important Source Files**
+
+```
+src/
+├── preprocess_html.py          # HTML → CSV parser
+├── utils.py                    # Preprocessing + cleaning helpers
+├── model.py                    # LSTM/GRU model classes
+└── forecasting.py              # Multi-step forecasting logic
+```
+
