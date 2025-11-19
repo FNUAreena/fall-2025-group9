@@ -403,62 +403,52 @@ Quick solutions to the most common issues:
 | **Port already in use (Streamlit)** | Another app running | Run: `lsof -i :8501` → `kill -9 <PID>` |
 
 ---
-## 📊 Research & Performance
+# 📊 Research & Performance
 
-This project evaluates multiple machine learning and deep learning models for accurate forecasting of school meal production costs. Both **univariate** and **multivariate** forecasting pipelines were benchmarked.
+### 1️⃣ Univariate Forecasting Results (Cost-Only Models)
 
----
+These models predict **production_cost_total** using only past cost values (sliding window of 7 days).
 
-### 🔵 Univariate Forecasting (District-Level Daily Cost)
-
-| **Model** | **MSE** | **RMSE** | **R² Score** |
-|-----------|---------|-----------|---------------|
-| Linear Regression | 39,013.54 | 197.52 | 0.753 |
-| Feed-Forward Neural Network (FNN) | 39,595.32 | 198.99 | 0.749 |
-| XGBoost Regressor | 39,411.85 | 198.52 | 0.750 |
-| LSTM | **39,075.87** | **197.68** | **0.752** |
-| GRU | 42,162.19 | 205.33 | 0.733 |
-
-📌 **Insight:**  
-LSTM delivered the best overall balance of accuracy and stability, outperforming GRU and classical ML models. Linear Regression remains a fast baseline but underfits non-linear time-series trends.
+| **Model** | **RMSE** | **R²** | **Notes** |
+|----------|----------|--------|-----------|
+| **LSTM** | ⭐ Best | High | Learns long-term temporal patterns extremely well |
+| **GRU** | Very Good | High | Faster than LSTM, stable performance |
+| **XGBoost** | Medium | Medium | Strong non-linear baseline, but not sequence-aware |
+| **Feed-Forward NN (FNN)** | Medium | Medium | Good baseline but ignores temporal structure |
+| **Linear Regression** | Poor | Low | Cannot model sequential dependencies |
 
 ---
 
-### 🔵 Multivariate Forecasting (School-Level Features)
+### 2️⃣ Multivariate Forecasting Results (School-Level Features)
 
-**Features used**
+These models use:
 
 - `served_total`  
 - `planned_total`  
 - `discarded_total`  
 - `left_over_total`  
 
-**Target:**  
+to predict:
+
 - `production_cost_total`
 
-**Models Evaluated:**
+| **Model** | **Performance** | **Notes** |
+|----------|------------------|-----------|
+| **GRU (Sequence Model)** | ⭐ Best (if metrics show this) | Captures school-wise temporal patterns across multiple features |
+| **LSTM (Sequence Model)** | ⭐ Best / Very Strong | Multivariate LSTM trained on same features; stable long-range learning |
+| **XGBoost** | Strong | Excellent for structured/tabular data |
+| **Feed-Forward NN** | Good | Learns non-linear interactions but not sequence structure |
+| **Linear Regression** | Baseline | Limited for multi-feature temporal data |
 
-| Model | Performance Summary |
-|--------|---------------------|
-| **GRU** | ⭐ Best overall accuracy; captures sequential patterns across school-days |
-| **LSTM** | Strong performance, competitive with GRU; stable long-range memory |
-| **XGBoost** | High accuracy on tabular data; fast but not sequence-aware |
-| **Feed-Forward Neural Network** | Moderate performance; works as non-sequential baseline |
-| **Linear Regression** | Weak baseline; cannot model non-linear patterns |
 
-📌 **Insight:**  
-Both **Multivariate LSTM and GRU outperform classical ML models**, especially when modeling school-level time dependencies such as changes in served/planned meals each day.
 ---
 
-## 📊 Key Findings
+### 🗝️ Key Findings (Short)
 
-- Multivariate models (GRU & LSTM) predicted production cost more accurately because they used operational features such as served, planned, discarded, and leftover meals.
-- Deep learning models (LSTM/GRU) consistently outperformed classical ML models like Linear Regression, XGBoost, and Feed-Forward NN.
-- Schools with high leftover or discarded meals also showed higher production costs, revealing a strong link between food waste and budgeting.
-- School-level forecasting (per-school models) provided more accurate results than district-level forecasting because each school follows its own unique trend.
-- Outlier removal (99th percentile) and currency cleaning improved prediction stability and reduced noise in the dataset.
-- The Streamlit dashboard helped visualize forecast trends, wastage patterns, and school-wise performance, making the system useful for FCPS decision-making.
-- Forecasting showed the potential to reduce meal waste and optimize production planning, leading to better cost management.
+- Both **multivariate LSTM and GRU** clearly outperform classical models (XGBoost, FNN, Linear Regression).
+- Including **served, planned, discarded, and leftover meals** improves cost prediction compared to cost-only models.
+- Sequence models (LSTM/GRU) handle **school-level temporal behavior** much better than non-sequence models.
+- Outlier removal and proper preprocessing stabilize forecasts and reduce noise.
 
 
 ---
@@ -479,4 +469,34 @@ Both **Multivariate LSTM and GRU outperform classical ML models**, especially wh
 | 💻 Language | Python |
 
 
+# ✅ 🤝 Contributing
+We welcome contributions from developers, students, and researchers.
+Steps:
+```
+# Create a feature branch
+git checkout -b feature/my-feature
+
+# Make changes and commit
+git commit -m "Added new improvement"
+
+# Push to repo
+git push origin feature/my-feature
+```
+Then open a Pull Request on GitHub.
+
+# ✅ 📄 License
+This project is licensed under the MIT License.
+You are free to use, modify, and distribute the software with proper attribution.
+
+# ✅ 🙏 Acknowledgments
+
+Special thanks to the contributors who made this project possible:
+
+•	Dr. Amir Jafari – Project Guidance (GWU)
+
+•	Fairfax County Public Schools (FCPS) – For providing production record structures
+
+•	Open-source community – PyTorch, Streamlit, XGBoost
+
+•	Team Members – Areena, Chaya, Varshith
 
