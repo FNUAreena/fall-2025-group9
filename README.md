@@ -336,15 +336,33 @@ src/
 # ✅ 📊 Dashboard (Streamlit App)
 
 Our interactive FCPS Meal Analytics Dashboard provides real-time insights into school meal operations.
-It allows administrators, data analysts, and cafeteria managers to explore meal patterns, waste ratios, and cost forecasts.
+Run the full interactive dashboard
 
-### 🔍 Features
-•	School-wise filtering (compare schools)
-•	Breakfast vs Lunch trends
-•	Daily/weekly cost visualization
-•	Waste insights (discarded + leftover analysis)
-•	What-If Scenario Forecasting using ML
-(e.g., change served/planned meals → see predicted cost)
-•	Benchmark comparison between LSTM, GRU, XGBoost, LR, FNN
+```
+streamlit run app_dashboard_nav.py
+```
 
+### 🔍 Includes
+✔ School-wise analysis
+✔ Waste heatmap
+✔ What-if prediction sliders
+✔ LSTM vs GRU comparison
+✔ Loss-making school detection
+✔ Forecast charts by date & school
+
+# 📡 API Endpoints (Internal Functions)
+Our project does not expose a public API, but the dashboard + Python scripts rely on reusable ML functions.
+📌 Core Internal APIs (Functions)
+Function	Location	Purpose
+forecast_future_dates()	src/forecasting.py	Predicts k future days of cost using trained LSTM/GRU
+load_and_aggregate_district()	src/utils.py	Loads CSV → cleans → aggregates district totals
+ForecastingModel()	src/model.py	LSTM/GRU model architecture
+preprocess_html()	src/preprocess_html.py	Converts FCPS HTML → clean CSV
+EarlyStopping()	src/utils.py	Used for deep learning model training stability
+
+### Used by
+•	Streamlit dashboard
+•	Univariate forecasting
+•	Multivariate forecasting
+•	Model comparison pipeline
 
