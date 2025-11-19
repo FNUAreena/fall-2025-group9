@@ -369,8 +369,39 @@ preprocess_html()	src/preprocess_html.py	Converts FCPS HTML → clean CSV
 EarlyStopping()	src/utils.py	Used for deep learning model training stability
 
 ### Used by
+
 •	Streamlit dashboard
+
 •	Univariate forecasting
+
 •	Multivariate forecasting
+
 •	Model comparison pipeline
+
+## 📡 API Endpoints
+
+Although this project does not use external REST APIs, the internal Streamlit dashboard relies on several Python-based API-like functions that power forecasting and analysis.
+
+### 🔧 Internal Model Endpoints
+
+| Function | Description | Location |
+|---------|-------------|----------|
+| `forecast_future_dates()` | Predicts next *k* days using trained LSTM/GRU models | `src/forecasting.py` |
+| `load_and_aggregate_district()` | Loads CSV + cleans + aggregates district production cost | `src/utils.py` |
+| `safe_time_split()` | Chronological train-test split for time-series | `src/utils.py` |
+| `TimeSeriesDataset` | Creates sliding windows for univariate LSTM/GRU | `src/utils.py` |
+| `ForecastingModel` | LSTM/GRU model class | `src/model.py` |
+| `FeedForwardRegressor` | Baseline neural network model | `src/model.py` |
+| `forecast_all_models_in_folder()` | Runs forecasts for every school (batch mode) | `app.py` |
+| `school_loss_analysis()` | Detects schools with high loss or wastage | `app.py` |
+
+### 🖥️ Dashboard-Level Actions (Triggered in Streamlit)
+
+| Action | Trigger Button | What Happens |
+|--------|----------------|--------------|
+| Run Forecast | **Run Forecast** | Loads all LSTM/GRU models and predicts next *k* days |
+| Compare Models | **Compare LSTM vs GRU** | Runs both folders → compares total cost curves |
+| AI Recommendations | **AI Recommendations** | Suggests waste reduction strategies |
+| Wastage Heatmap | Auto-loaded | Creates weekday-based discarded food heatmap |
+| School-Level View | Dropdown Filters | Filters graphs/tables by school + meal type |
 
