@@ -356,29 +356,8 @@ streamlit run app_dashboard_nav.py
 
 ✔ Forecast charts by date & school
 
-# 📡 API Endpoints (Internal Functions)
 
-Our project does not expose a public API, but the dashboard + Python scripts rely on reusable ML functions.
-📌 Core Internal APIs (Functions)
-
-Function	Location	Purpose
-forecast_future_dates()	src/forecasting.py	Predicts k future days of cost using trained LSTM/GRU
-load_and_aggregate_district()	src/utils.py	Loads CSV → cleans → aggregates district totals
-ForecastingModel()	src/model.py	LSTM/GRU model architecture
-preprocess_html()	src/preprocess_html.py	Converts FCPS HTML → clean CSV
-EarlyStopping()	src/utils.py	Used for deep learning model training stability
-
-### Used by
-
-•	Streamlit dashboard
-
-•	Univariate forecasting
-
-•	Multivariate forecasting
-
-•	Model comparison pipeline
-
-## 📡 API Endpoints
+# 📡 API Endpoints
 
 Although this project does not use external REST APIs, the internal Streamlit dashboard relies on several Python-based API-like functions that power forecasting and analysis.
 
@@ -404,4 +383,24 @@ Although this project does not use external REST APIs, the internal Streamlit da
 | AI Recommendations | **AI Recommendations** | Suggests waste reduction strategies |
 | Wastage Heatmap | Auto-loaded | Creates weekday-based discarded food heatmap |
 | School-Level View | Dropdown Filters | Filters graphs/tables by school + meal type |
+
+# 🔧 Troubleshooting
+
+Below is a quick issue–cause–solution table for common problems during preprocessing, training, and running the dashboard.
+
+| **Issue** | **Cause** | **Fix** |
+|----------|-----------|---------|
+| HTML parser creates empty CSVs | Wrong folder path or FCPS HTML structure changed | Verify breakfast/lunch HTML folder paths before running `preprocess_html.py` |
+| Date parsing errors | FCPS date format sometimes inconsistent (day-first ambiguity) | Use: `pd.to_datetime(df['date'], dayfirst=True, errors='coerce')` (already in code) |
+| LSTM/GRU model not loading | Incorrect `.pth` file path or model folder missing | Ensure paths: `univariate/LSTM_models/` / `univariate/GRU_models/` and filenames match |
+| Streamlit dashboard shows blank page | Cached stale data | Run: `streamlit cache clear` |
+| XGBoost import error | Package not installed | Run: `pip install xgboost` |
+| Forecast jumps too high | Outliers affecting scaling | 99th percentile outlier cleaning is included → verify preprocessing step |
+| Model training too slow | Large hidden size (256) impacts training speed | Reduce `HIDDEN_DIM` from 256 → 128 |
+| School forecast returns empty | School name mismatch between CSV and model filename | Ensure model filename uses underscores (e.g., `Aldrin_Elementary`) and CSV uses spaces (`Aldrin Elementary`) |
+| Heatmap shows blank values | `discarded_total` not numeric | Convert using: `pd.to_numeric(..., errors='coerce').fillna(0)` |
+| "Forecast failed" message | Not enough school-specific data or corrupted model | Retrain that school's model OR check that subset CSV has sufficient rows |
+| Streamlit port already in use | Another instance running | Kill port: `lsof -i :8501` → `kill -9 <PID>` |
+
+---
 
