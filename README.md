@@ -253,15 +253,15 @@ python preprocess_html.py
 ```
 This script:
 
-Reads FCPS breakfast & lunch HTML production records
+- Reads FCPS breakfast & lunch HTML production records
 
-Extracts → served, planned, discarded, leftover, cost
+- Extracts → served, planned, discarded, leftover, cost
 
-Cleans currency & % values
+- Cleans currency & % values
 
-Standardizes headers
+- Standardizes headers
 
-Generates:
+- Generates:
 
 ```
 Data/Output/breakfast_combined.csv
@@ -275,11 +275,13 @@ Data/Output/meals_combined.csv
 cd src/univariate
 python main.py
 ```
+
 This will:
-Aggregate total district production cost per day
-Create sliding windows
-Train LSTM/GRU
-Save model + plots into:
+
+- Aggregate total district production cost per day
+- Create sliding windows
+- Train LSTM/GRU
+- Save model + plots into:
 
 ```
 univariate/results/
