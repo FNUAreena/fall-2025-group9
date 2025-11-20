@@ -100,3 +100,4 @@ src/component/univariate/LSTM_models/LSTM_Forest_Edge_Elementary_breakfast.pth
 src/component/univariate/LSTM_models/LSTM_Forest_Edge_Elementary_lunch.pth
 src/component/univariate/LSTM_models/LSTM_Forestdale_Elementary_breakfast.pth
 src/component/univariate/LSTM_models/LSTM_Forestdale_Elementary_lunch.pth
+*.md
