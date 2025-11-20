@@ -19,11 +19,11 @@ MODEL_TYPE = "LSTM"
 HIDDEN_DIM = 256
 NUM_LAYERS = 4
 DROPOUT = 0.25
-WINDOW = 7
-ASPLIT = 0.7
+WINDOW = 3
+ASPLIT = 0.6
 K_STEPS = 10
 
-MODEL_PATH = "univariate/results/LSTM.pth"
+MODEL_PATH = f"univariate/LSTM_models/{MODEL_TYPE}.pth"
 
 
 def next_days(last_date: pd.Timestamp, k: int) -> pd.DatetimeIndex:
@@ -109,20 +109,14 @@ def forecast_future_dates(
         raise ValueError(
             f"Series for {school_name!r}/{meal_type!r} too short (n={len(values_sm)}) for WINDOW={window}."
         )
-
-    # ------------------------------------------------------------------
-    # Recompute split and fit scaler on train only (same logic as main.py)
-    # ------------------------------------------------------------------
     split_idx = safe_time_split(values_sm, asplit, window)
     train_raw = values_sm[:split_idx]
 
     scaler = MinMaxScaler()
     scaler.fit(train_raw)
     full_scaled = scaler.transform(values_sm).ravel()
-
-    # ------------------------------------------------------------------
+    
     # Load the trained model weights for this school+meal
-    # ------------------------------------------------------------------
     school_safe = str(school_name).replace(" ", "_").replace("/", "_")
     meal_safe   = str(meal_type).replace(" ", "_").replace("/", "_")
     base_dir = os.path.dirname(model_path) or "."
@@ -148,9 +142,7 @@ def forecast_future_dates(
     model.load_state_dict(state)
     model.eval()
 
-    # ------------------------------------------------------------------
     # Forecast next k_steps in scaled space, then inverse-transform
-    # ------------------------------------------------------------------
     last_window = full_scaled[-window:].astype(np.float32).copy()
     preds_scaled = []
 
