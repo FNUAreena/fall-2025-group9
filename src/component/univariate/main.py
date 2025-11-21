@@ -69,16 +69,20 @@ def main():
         plot_actual_vs_predicted(all_true_arr, all_pred_arr, MODEL_TYPE, f"univariate/plots/{MODEL_TYPE}.png")
 
     all_forecasts = []
+    forecast_true_all = []
+    forecast_pred_all = []
     unique_combinations = df_series[['school_name', 'meal_type']].drop_duplicates()
     for _, row in unique_combinations.iterrows():
         school, meal = row['school_name'], row['meal_type']
         try:
-            df_forecast = forecast_future_dates(
-                csv_path=CSV_PATH, date_col=DATE_COL, target_col=TARGET_COL, window=WINDOW, asplit=ASPLIT, k_steps=10,
-                model_type=MODEL_TYPE, model_path=f"univariate/LSTM_models/{MODEL_TYPE}.pth", hidden_dim=HIDDEN_DIM,
-                num_layers=NUM_LAYERS, dropout=DROPOUT, school_name=school, meal_type=meal
-            )
+            df_forecast, bt_true, bt_pred = forecast_future_dates(csv_path=CSV_PATH,date_col=DATE_COL,target_col=TARGET_COL,window=WINDOW,
+                                    asplit=ASPLIT,k_steps=10,model_type=MODEL_TYPE,model_path=f"univariate/LSTM_models/{MODEL_TYPE}.pth",
+                                    hidden_dim=HIDDEN_DIM,num_layers=NUM_LAYERS,dropout=DROPOUT,school_name=school,meal_type=meal)
             all_forecasts.append(df_forecast)
+            if bt_true is not None:
+                forecast_true_all.append(bt_true)
+                forecast_pred_all.append(bt_pred)
+
         except Exception as e:
             print(f"[error] Forecasting failed for school={school!r}, meal_type={meal!r}: {e}")
 
@@ -88,6 +92,18 @@ def main():
         df_all_forecast.to_csv(output_path, index=False)
         print(f"\n[saved] Combined 10-day forecasts for all schools/meals -> {output_path}")
         print(df_all_forecast.head(20))
+        if len(forecast_true_all) > 0:
+            y_true_bt = np.concatenate(forecast_true_all)
+            y_pred_bt = np.concatenate(forecast_pred_all)
+            bt_mse  = mean_squared_error(y_true_bt, y_pred_bt)
+            bt_rmse = float(np.sqrt(bt_mse))
+            bt_r2   = r2_score(y_true_bt, y_pred_bt)
+            print("\n=== OVERALL 10-STEP FORECAST BACKTEST (all schools & meals) ===")
+            print(f"Forecast MSE : {bt_mse:.4f}")
+            print(f"Forecast RMSE: {bt_rmse:.4f}")
+            print(f"Forecast R^2: {bt_r2:.4f}")
+        else:
+            print("\n[warn] No backtest forecast metrics collected (series too short).")
 
 if __name__ == "__main__":
     main()
