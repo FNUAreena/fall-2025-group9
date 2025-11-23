@@ -5,42 +5,25 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.metrics import mean_squared_error, r2_score
-from utils import seed_everything, load_and_aggregate_district
+from utils import seed_everything, load_and_aggregate_district, safe_time_split
 from forecasting import forecast_future_dates
-from plot import plot_actual_vs_predicted
+from plot import plot_actual_vs_predicted, plot_train_test_forecast
 from training import train_and_evaluate
 
 # Paths and column names
-CSV_PATH   = "Data/Output/meals_combined.csv"
-DATE_COL   = "date"
-TARGET_COL = "production_cost_total"
+CSV_PATH   = "Data/Output/meals_combined.csv";DATE_COL   = "date";TARGET_COL = "production_cost_total"
 
 # Model and training hyperparameters
-WINDOW     = 3
-ASPLIT     = 0.6
-MODEL_TYPE = "LSTM"
-HIDDEN_DIM = 256
-INPUT_DIM  = 1
-OUTPUT_DIM = 1
-NUM_LAYERS = 4
-DROPOUT    = 0.25
-
-EPOCHS     = 100
-BATCH_SIZE = 64
-LR         = 0.001
-SEED       = 42
-
+WINDOW     = 3; ASPLIT     = 0.6; MODEL_TYPE = "LSTM"; HIDDEN_DIM = 256
+INPUT_DIM  = 1; OUTPUT_DIM = 1; NUM_LAYERS = 4; DROPOUT= 0.25
+EPOCHS     = 100; BATCH_SIZE = 64; LR= 0.001; SEED = 42
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 seed_everything(SEED)
 torch.manual_seed(SEED)
 
 def main():
-    model_dir = os.path.join("univariate", f"{MODEL_TYPE}_models")
-    results_dir = os.path.join("univariate", "results")
-    plots_dir = os.path.join("univariate", "plots")
-    os.makedirs(model_dir, exist_ok=True)
-    os.makedirs(results_dir, exist_ok=True)
-    os.makedirs(plots_dir, exist_ok=True)
+    model_dir = os.path.join("univariate", f"{MODEL_TYPE}_models"); results_dir = os.path.join("univariate", "results");plots_dir = os.path.join("univariate", "plots")
+    for d in (model_dir,results_dir,plots_dir): os.makedirs(d,exist_ok=True)
 
     dates, values, _, _ = load_and_aggregate_district(
         CSV_PATH=CSV_PATH, DATE_COL=DATE_COL, TARGET_COL=TARGET_COL, dayfirst="auto", debug=True
@@ -99,11 +82,30 @@ def main():
             bt_rmse = float(np.sqrt(bt_mse))
             bt_r2   = r2_score(y_true_bt, y_pred_bt)
             print("\n=== OVERALL 10-STEP FORECAST BACKTEST (all schools & meals) ===")
-            print(f"Forecast MSE : {bt_mse:.4f}")
-            print(f"Forecast RMSE: {bt_rmse:.4f}")
-            print(f"Forecast R^2: {bt_r2:.4f}")
+            print(f"Forecast MSE : {bt_mse:.4f}\nForecast RMSE: {bt_rmse:.4f}\nForecast R^2: {bt_r2:.4f}")
         else:
             print("\n[warn] No backtest forecast metrics collected (series too short).")
+        
+        # ---- Example train/test/forecast plot for first school+meal ----
+        ex=unique_combinations.iloc[1]
+        ex_school,ex_meal=ex["school_name"],ex["meal_type"]
+        df_ex=df_series[(df_series["school_name"]==ex_school)&(df_series["meal_type"]==ex_meal)].copy()
+        if df_ex.empty:
+            print(f"[warn] No data for example series {ex_school!r}/{ex_meal!r}")
+        else:
+            vals = df_ex[TARGET_COL].values.astype("float32").reshape(-1, 1)
+            split_idx = safe_time_split(vals, ASPLIT, WINDOW)
 
+            df_ex_forecast = df_all_forecast[(df_all_forecast["school_name"] == ex_school) &(df_all_forecast["meal_type"] == ex_meal)].sort_values("forecast_date")
+
+        plot_train_test_forecast(
+            dates=df_ex[DATE_COL].values,
+            values=df_ex[TARGET_COL].values,
+            split_idx=split_idx,
+            forecast_dates=df_ex_forecast["forecast_date"].values,
+            forecast_values=df_ex_forecast[TARGET_COL].values,
+            title=f"{MODEL_TYPE} Train/Test/Forecast - {ex_school} ({ex_meal})",
+            plot_path=f"{plots_dir}/{MODEL_TYPE}_train_test_forecast_example.png",
+        )
 if __name__ == "__main__":
     main()
