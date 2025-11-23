@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'component', 'univariate')))
 import warnings
 warnings.filterwarnings("ignore")
 import os
@@ -10,8 +13,11 @@ from forecasting import forecast_future_dates
 from plot import plot_actual_vs_predicted, plot_train_test_forecast
 from training import train_and_evaluate
 
-# Paths and column names
-CSV_PATH   = "Data/Output/meals_combined.csv";DATE_COL   = "date";TARGET_COL = "production_cost_total"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH   = os.path.join(current_dir, '..', 'component', 'Data', 'Output', 'meals_combined.csv')
+DATE_COL   = "date"
+
+TARGET_COL = "production_cost_total"
 
 # Model and training hyperparameters
 WINDOW     = 3; ASPLIT     = 0.6; MODEL_TYPE = "LSTM"; HIDDEN_DIM = 256
@@ -22,7 +28,9 @@ seed_everything(SEED)
 torch.manual_seed(SEED)
 
 def main():
-    model_dir = os.path.join("univariate", f"{MODEL_TYPE}_models"); results_dir = os.path.join("univariate", "results");plots_dir = os.path.join("univariate", "plots")
+    model_dir = os.path.join(current_dir, '..', 'component', 'univariate', f"{MODEL_TYPE}_models")
+    results_dir = os.path.join(current_dir, '..', 'component', 'univariate', "results")
+    plots_dir = os.path.join(current_dir, '..', '..', 'demo', 'images', 'univariate_plots')
     for d in (model_dir,results_dir,plots_dir): os.makedirs(d,exist_ok=True)
 
     dates, values, _, _ = load_and_aggregate_district(
@@ -49,7 +57,7 @@ def main():
         print(f"MSE : {overall_mse:.4f}")
         print(f"RMSE: {overall_rmse:.4f}")
         print(f"R^2 : {overall_r2:.4f}")
-        plot_actual_vs_predicted(all_true_arr, all_pred_arr, MODEL_TYPE, f"univariate/plots/{MODEL_TYPE}.png")
+        plot_actual_vs_predicted(all_true_arr, all_pred_arr, MODEL_TYPE, os.path.join(plots_dir, f"{MODEL_TYPE}.png"))
 
     all_forecasts = []
     forecast_true_all = []
@@ -59,7 +67,7 @@ def main():
         school, meal = row['school_name'], row['meal_type']
         try:
             df_forecast, bt_true, bt_pred = forecast_future_dates(csv_path=CSV_PATH,date_col=DATE_COL,target_col=TARGET_COL,window=WINDOW,
-                                    asplit=ASPLIT,k_steps=10,model_type=MODEL_TYPE,model_path=f"univariate/LSTM_models/{MODEL_TYPE}.pth",
+                                    asplit=ASPLIT,k_steps=10,model_type=MODEL_TYPE,model_path=os.path.join(model_dir, f"{MODEL_TYPE}.pth"),
                                     hidden_dim=HIDDEN_DIM,num_layers=NUM_LAYERS,dropout=DROPOUT,school_name=school,meal_type=meal)
             all_forecasts.append(df_forecast)
             if bt_true is not None:
@@ -71,7 +79,7 @@ def main():
 
     if len(all_forecasts) > 0:
         df_all_forecast = pd.concat(all_forecasts, ignore_index=True)
-        output_path = "univariate/results/all_school_meal_forecasts.csv"
+        output_path = os.path.join(results_dir, "all_school_meal_forecasts.csv")
         df_all_forecast.to_csv(output_path, index=False)
         print(f"\n[saved] Combined 10-day forecasts for all schools/meals -> {output_path}")
         print(df_all_forecast.head(20))
@@ -98,14 +106,9 @@ def main():
 
             df_ex_forecast = df_all_forecast[(df_all_forecast["school_name"] == ex_school) &(df_all_forecast["meal_type"] == ex_meal)].sort_values("forecast_date")
 
-        plot_train_test_forecast(
-            dates=df_ex[DATE_COL].values,
-            values=df_ex[TARGET_COL].values,
-            split_idx=split_idx,
-            forecast_dates=df_ex_forecast["forecast_date"].values,
-            forecast_values=df_ex_forecast[TARGET_COL].values,
-            title=f"{MODEL_TYPE} Train/Test/Forecast - {ex_school} ({ex_meal})",
-            plot_path=f"{plots_dir}/{MODEL_TYPE}_train_test_forecast_example.png",
-        )
+            plot_train_test_forecast(dates=df_ex[DATE_COL].values,values=df_ex[TARGET_COL].values,
+                        split_idx=split_idx,forecast_dates=df_ex_forecast["forecast_date"].values,
+                        forecast_values=df_ex_forecast[TARGET_COL].values,title=f"{MODEL_TYPE} Train/Test/Forecast - {ex_school} ({ex_meal})",
+                        plot_path=os.path.join(plots_dir, f"{MODEL_TYPE}_train_test_forecast_example.png"))
 if __name__ == "__main__":
     main()
