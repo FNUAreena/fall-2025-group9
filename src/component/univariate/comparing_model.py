@@ -19,13 +19,17 @@ from model import FeedForwardRegressor
 import faulthandler
 faulthandler.enable()
 
-CSV_PATH   = "Data/Output/meals_combined.csv"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(current_dir, '..', 'Data', 'Output', 'meals_combined.csv')
 DATE_COL   = "date"
 TARGET_COL = "production_cost_total"
 
 WINDOW     = 7
 ASPLIT     = 0.7
 SEED       = 42
+results_dir = os.path.join(current_dir, 'results')
+current_dir = os.path.dirname(os.path.abspath(__file__))
+plots_dir = os.path.join(current_dir, '..', '..', '..', 'demo', 'images', 'univariate_plots')
 
 EPOCHS_FNN = 100
 LR_FNN     = 0.001
@@ -90,7 +94,7 @@ lin = LinearRegression()
 lin.fit(Xtr, ytr)
 pred_lin = invert_with(scaler, lin.predict(Xe))
 results.append(eval_report("LinearReg", y_true, pred_lin))
-with open("univariate/results/linear_regression.pkl", "wb") as f:
+with open(os.path.join(results_dir, "linear_regression.pkl"), "wb") as f:
     pickle.dump(lin, f)
 print(" Saved Linear Regression model and plot")
 
@@ -105,7 +109,7 @@ plt.xlabel("Actual Production Cost")
 plt.ylabel("Predicted Production Cost")
 plt.title("Linear Regression Predicted vs Actual")
 plt.grid(True); plt.legend()
-plt.savefig("univariate/plots/linear_regression.png", bbox_inches='tight', dpi=300)
+plt.savefig(os.path.join(plots_dir, "linear_regression.png"), bbox_inches='tight', dpi=300)
 plt.close()
 
 xgb = XGBRegressor(
@@ -135,8 +139,8 @@ plt.xlabel("Actual Production Cost")
 plt.ylabel("Predicted Production Cost")
 plt.title("XGBoost Predicted vs Actual")
 plt.grid(True); plt.legend()
-plt.savefig("univariate/plots/xgboost_model.png", bbox_inches='tight', dpi=300)
-xgb.save_model("univariate/results/xgboost_model.json")
+plt.savefig(os.path.join(plots_dir, "xgboost_model.png"), bbox_inches='tight', dpi=300)
+xgb.save_model(os.path.join(results_dir, "xgboost_model.json"))
 print("Saved XGBoost model and plot")
 plt.close()
 
@@ -178,8 +182,8 @@ plt.xlabel("Actual Production Cost")
 plt.ylabel("Predicted Production Cost")
 plt.title("FNN Predicted vs Actual")
 plt.grid(True); plt.legend()
-plt.savefig("univariate/plots/fnn_model.png", bbox_inches='tight', dpi=300)
-torch.save(fnn.state_dict(), "univariate/results/fnn_model.pth")
+plt.savefig(os.path.join(plots_dir, "fnn_model.png"), bbox_inches='tight', dpi=300)
+torch.save(fnn.state_dict(), os.path.join(results_dir, "fnn_model.pth"))
 print("Saved FNN model and plot")
 plt.close()
 
