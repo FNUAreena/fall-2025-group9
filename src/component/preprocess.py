@@ -19,9 +19,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 
 # ========= CONFIG (edit these 3 paths) =========
-BREAKFAST_PATH = Path(r"C:/Users/B Varshith Reddy/OneDrive/Documents/GitHub/fall-2025-group9/src/component/Data/Html/May 2025 Breakfast production records")  # folder or single .html
-LUNCH_PATH     = Path(r"C:/Users/B Varshith Reddy/OneDrive/Documents/GitHub/fall-2025-group9/src/component/Data/Html/May 2025 Lunch production records")      # folder or single .html
-OUTDIR         = Path(r"C:/Users/B Varshith Reddy/OneDrive/Documents/GitHub/fall-2025-group9/src/component/Data/Output")
+BREAKFAST_PATH = Path("src/component/Data/Html/May 2025 Breakfast production records")
+LUNCH_PATH     = Path("src/component/Data/Html/May 2025 Lunch production records")
+OUTDIR         = Path("src/component/Data/Output")
 
 BASE_ORDER = [
     "school_name","date","identifier","name",
