@@ -14,7 +14,7 @@ from plot import plot_actual_vs_predicted, plot_train_test_forecast
 from training import train_and_evaluate
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-CSV_PATH   = os.path.join(current_dir, '..', 'component', 'Data', 'Output', 'meals_combined.csv')
+CSV_PATH   = os.path.join(current_dir, '..', 'Data', 'Output', 'meals_combined.csv')
 DATE_COL   = "date"
 
 TARGET_COL = "production_cost_total"
@@ -29,7 +29,7 @@ torch.manual_seed(SEED)
 
 def main():
     model_dir = os.path.join(current_dir, '..', 'component', 'univariate', f"{MODEL_TYPE}_models")
-    results_dir = os.path.join(current_dir, '..', 'component', 'univariate', "results")
+    results_dir = os.path.join(current_dir, '..', 'results')
     plots_dir = os.path.join(current_dir, '..', '..', 'demo', 'images', 'univariate_plots')
     for d in (model_dir,results_dir,plots_dir): os.makedirs(d,exist_ok=True)
 

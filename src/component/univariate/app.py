@@ -13,7 +13,7 @@ import pickle
 from model import ForecastingModel
 
 
-CSV_PATH = "Data/Output/meals_combined.csv"
+CSV_PATH = "src/Data/Output/meals_combined.csv"
 LSTM_MODELS_FOLDER = "univariate/LSTM_models"   # folder containing files like LSTM_Aldrin_Elementary_lunch.pth
 GRU_MODELS_FOLDER  = "univariate/GRU_models"    # folder containing files like GRU_Aldrin_Elementary_lunch.pth
 TEMP_SCHOOL_CSV = "temp_school.csv"

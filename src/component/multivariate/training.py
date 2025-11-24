@@ -11,6 +11,12 @@ from model import FeedForwardNN, ForecastingModel
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pad_sequence
 import numpy as np
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+results_dir = os.path.join(current_dir, '..', '..', 'results')
+
+
 
 def train_linear_regression(X_train, y_train, X_test, y_test):
     lr_model = LinearRegression()
@@ -20,7 +26,7 @@ def train_linear_regression(X_train, y_train, X_test, y_test):
     r2_lr = r2_score(y_test, y_pred_lr)
     mae_lr = mean_absolute_error(y_test, y_pred_lr)
     print(f"Linear Regression → MSE: {mse_lr:.4f}, R²: {r2_lr:.4f}, MAE: {mae_lr:.4f}")
-    lr_filepath = "multivariate/results/linear_regression.pkl"
+    lr_filepath = os.path.join(results_dir, "linear_regression.pkl")
     with open(lr_filepath, "wb") as f:
         pickle.dump(lr_model, f)
     print(f"Saved LR model to {lr_filepath}")
@@ -34,7 +40,7 @@ def train_xgboost(X_train, y_train, X_test, y_test):
     r2_xgb = r2_score(y_test, y_pred_xgb)
     mae_xgb = mean_absolute_error(y_test, y_pred_xgb)
     print(f"XGBoost → MSE: {mse_xgb:.4f}, R²: {r2_xgb:.4f}, MAE: {mae_xgb:.4f}")
-    xgb_filepath = "multivariate/results/xgboost_model.json"
+    xgb_filepath = os.path.join(results_dir, "xgboost_model.json")
     xgb_model.save_model(xgb_filepath)
     plot_actual_vs_predicted(y_test, y_pred_xgb, "XGBoost", "multivariate/plots/xgboost_model.png")
 
@@ -65,7 +71,7 @@ def train_fnn(X_train, y_train, X_test, y_test, features):
     r2_fnn = r2_score(y_test, y_pred_fnn)
     mae_fnn = mean_absolute_error(y_test, y_pred_fnn)
     print(f"FNN → MSE: {mse_fnn:.4f}, R²: {r2_fnn:.4f}, MAE: {mae_fnn:.4f}")
-    fnn_filepath = "multivariate/results/fnn_model.pth"
+    fnn_filepath = os.path.join(results_dir, "fnn_model.pth")
     torch.save(fnn_model.state_dict(), fnn_filepath)
     plot_actual_vs_predicted(y_test, y_pred_fnn, "FNN", "multivariate/plots/fnn_model.png")
 
@@ -122,7 +128,7 @@ def train_gru(preprocessed_data, features, target):
     print(f"R²: {r2:.4f}")
     print(f"MAE: {mae:.4f}")
 
-    torch.save(model.state_dict(), f"multivariate/results/{MODEL_TYPE}.pth")
+    torch.save(model.state_dict(), os.path.join(results_dir, f"{MODEL_TYPE}.pth"))
     plot_actual_vs_predicted(np.array(y_true_all), np.array(y_pred_all), MODEL_TYPE, f"multivariate/plots/{MODEL_TYPE}.png")
 
 class SchoolMealDataset(Dataset):
