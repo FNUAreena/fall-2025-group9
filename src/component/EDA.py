@@ -8,7 +8,7 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.decomposition import TruncatedSVD
 from numpy.linalg import svd
 
-df = pd.read_csv("Data/Output/meals_combined.csv")
+df = pd.read_csv("src/Data/Output/meals_combined.csv")
 
 #%%
 # Outlier Detection for 'production_cost_total' 

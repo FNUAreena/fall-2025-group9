@@ -27,7 +27,7 @@ TARGET_COL = "production_cost_total"
 WINDOW     = 7
 ASPLIT     = 0.7
 SEED       = 42
-results_dir = os.path.join(current_dir, 'results')
+results_dir = os.path.join(current_dir, '..', '..', 'results')
 current_dir = os.path.dirname(os.path.abspath(__file__))
 plots_dir = os.path.join(current_dir, '..', '..', '..', 'demo', 'images', 'univariate_plots')
 

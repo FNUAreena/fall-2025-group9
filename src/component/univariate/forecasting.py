@@ -11,7 +11,7 @@ from model import ForecastingModel
 
 
 # Hyperparameters (defaults; can be overridden via function args)
-CSV_PATH = "Data/Output/meals_combined.csv"
+CSV_PATH = "src/Data/Output/meals_combined.csv"
 DATE_COL = "date"
 TARGET_COL = "production_cost_total"
 
