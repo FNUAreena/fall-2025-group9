@@ -982,6 +982,9 @@ Figure~\ref{fig:lstm_forecast_example} shows an example forecast for
 dynamics and produced realistic short-horizon forecasts. This demonstrates its capacity
 to support operational planning for school meal cost estimation.
 
+In addition to visual inspection, we evaluated the model quantitatively using a 10-step ahead backtesting procedure. The univariate LSTM achieved a mean squared error (MSE) of 14{,}611.93, a root mean squared error (RMSE) 
+of 120.88, and an $R^{2}$ score of approximately 0.89. These results confirm that the model captures underlying cost dynamics effectively and provides reliable short-term forecasting accuracy.
+
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.95\columnwidth]{images/LSTM_train_test_forecast_example.png}
