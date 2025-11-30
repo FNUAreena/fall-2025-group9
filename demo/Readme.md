@@ -22,6 +22,5 @@ demo/
 │       └── xgboost_model.png
 │
 ├── .gitkeep
-├── Readme.md
 └── app.py
 ```
