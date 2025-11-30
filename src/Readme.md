@@ -53,7 +53,6 @@ src/
 │   
 │
 ├── .gitkeep
-├── Readme.md
 └── requirements.txt
 ,,,
 
