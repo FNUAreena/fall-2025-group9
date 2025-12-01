@@ -10,9 +10,6 @@ reports/
 │   └── .gitkeep
 │
 ├── Progress_Report/
-│   ├── Markdown_CheatSheet/
-│   │   └── .gitkeep
-│   │
 │   └── Word_Report/
 │       ├── .gitkeep
 │       ├── capstone (1) 1-2.pdf
