@@ -20,9 +20,8 @@ research_paper/
 ├── research_paper.tex
 │
 ├── Word/
-│   └── (Word version of paper, if added)
+│   └── Conference-template-A4.doc
 │
-├── Conference-template-A4.doc
 └── .DS_Store
 
 ```
