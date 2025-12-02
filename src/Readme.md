@@ -34,22 +34,15 @@ src/
 │       ├── training.py
 │       └── utils.py
 │
-├── docs/
-│   └── .gitkeep
-│
 ├── maincode/
-│   ├── combine_csv.py
-│   ├── multivariate_main.py
-│   └── univariate_main.py
+│   └── main.py
 │
 ├── results/
 │   └── all_school_meal_forecasts.csv
 │
-├── shellscripts/
-│   └── .gitkeep
-│
 ├── tests/
-│    └── .gitkeep
+│    ├── combine_csv.py
+│    └── multivariate_main.py
 │   
 │
 ├── .gitkeep
