@@ -343,21 +343,21 @@ demo/images/univariate_plots/
 ```
 src/
 ├── Data/
-│   ├── Html/                   # Raw HTML production records
-│   └── Output/                 # Combined CSVs (breakfast, lunch, meals)
+│   ├── Html/              
+│   └── Output/                 
 │
 ├── component/
-│   ├── preprocess.py           # Data cleaning & preprocessing helpers
-│   ├── EDA.py                  # Exploratory data analysis
-│   ├── univariate/             # Univariate forecasting models & utilities
-│   └── multivariate/           # Multivariate forecasting models & utilities
+│   ├── preprocess.py           
+│   ├── EDA.py                  
+│   ├── univariate/            
+│   └── multivariate/           
 │
 ├── maincode/
-│   ├── combine_csv.py          # Orchestrates HTML → CSV merging
-│   ├── univariate_main.py      # Entry script for univariate pipeline
-│   └── multivariate_main.py    # Entry script for multivariate pipeline
+│   ├── combine_csv.py               
+│   └── main.py    
 
 ```
+
 # ✅ 📊 Dashboard (Streamlit App)
 
 Our interactive FCPS Meal Analytics Dashboard provides real-time insights into school meal operations.
