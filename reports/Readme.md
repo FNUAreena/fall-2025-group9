@@ -3,6 +3,10 @@
 ```
 reports/
 ├── Latex_report/
+│   └── File_Setup.tex
+│   └── Report_PDF.pdf
+│   └── Report_Paper.text
+│   └── references.bib
 │   └── fig/
 │       └── .gitkeep
 │
