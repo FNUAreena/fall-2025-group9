@@ -69,7 +69,7 @@ Our pipeline transforms raw FCPS Production Records + POS data → **clean, stru
 
 ---
 
-### **1️⃣ HTML → CSV Parser (`preprocess_html.py`)**
+### **1️⃣ HTML → CSV Parser**
 
 ✔ Reads dozens of messy FCPS breakfast & lunch HTML files  
 ✔ Auto-detects school sections  
@@ -79,13 +79,13 @@ Our pipeline transforms raw FCPS Production Records + POS data → **clean, stru
 
 **Outputs generated:**
 
-- `breakfast_combined.csv`  
-- `lunch_combined.csv`  
-- `meals_combined.csv`  
+- `src/Data/Output/breakfast_combined.csv`  
+- `src/Data/Output/lunch_combined.csv`  
+- `src/Data/Output/meals_combined.csv` 
 
 ---
 
-### **2️⃣ Data Cleaning & Preprocessing (`utils.preprocess`)**
+### **2️⃣ Data Cleaning & Preprocessing **
 
 ✔ Cleans `$` & `%` → float  
 ✔ Converts & sorts dates  
