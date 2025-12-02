@@ -24,6 +24,6 @@ reports/
 │    └── img_2.png
 |
 |── Word_Report/   
-│    └── Final Report.docx  
+     └── Final Report.docx  
 
 ```
