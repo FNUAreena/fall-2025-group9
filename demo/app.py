@@ -4,7 +4,6 @@ import math
 import time
 from datetime import datetime
 from typing import Tuple, List
-
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -12,33 +11,18 @@ import plotly.express as px
 
 # --- Path setup ---
 import sys
-
-# Project root: C:\Github\fall-2025-group9
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-# Univariate module directory: C:\Github\fall-2025-group9\src\component\univariate
 UNIVARIATE_DIR = os.path.join(BASE_DIR, "src", "component", "univariate")
-
-# Add univariate folder to sys.path so `forecasting` and `utils` are top-level modules
 sys.path.insert(0, UNIVARIATE_DIR)
 
-# Import your project modules exactly like in univariate_main.py
 from forecasting import forecast_future_dates, next_days
-from utils import load_and_aggregate_district, safe_time_split
-
+from utils import load_and_aggregate_district, safe_time_split  
 # --- Config / paths ---
 CSV_PATH = os.path.join(BASE_DIR, "src", "Data", "Output", "meals_combined.csv")
 DATE_COL = "date"
 TARGET_COL = "production_cost_total"
-
-# Model directory and stub path (only dirname is used inside forecasting.py)
 MODEL_DIR = os.path.join(UNIVARIATE_DIR, "LSTM_models")
-MODEL_STUB = os.path.join(MODEL_DIR, "LSTM.pth")  # just a placeholder; forecasting swaps filename
-
-# Example train/test/forecast image
-TRAIN_TEST_IMAGE = os.path.join(
-    BASE_DIR, "demo", "images", "univariate_plots", "LSTM_train_test_forecast_example.png"
-)
+MODEL_STUB = os.path.join(MODEL_DIR, "LSTM.pth")
 
 st.set_page_config(page_title="School Production Cost Forecasting", layout="wide")
 
@@ -46,8 +30,7 @@ st.set_page_config(page_title="School Production Cost Forecasting", layout="wide
 @st.cache_data
 def load_series(csv_path=CSV_PATH):
     dates, values, _, _ = load_and_aggregate_district(
-        CSV_PATH=csv_path, DATE_COL=DATE_COL, TARGET_COL=TARGET_COL, dayfirst="auto", debug=False
-    )
+        CSV_PATH=csv_path, DATE_COL=DATE_COL, TARGET_COL=TARGET_COL, dayfirst="auto", debug=False)
     records = [(school, meal, pd.to_datetime(dt), float(v)) for (school, meal, dt), v in zip(dates, values.reshape(-1))]
     df = pd.DataFrame(records, columns=["school_name", "meal_type", DATE_COL, TARGET_COL])
     df = df.sort_values(["school_name", "meal_type", DATE_COL]).reset_index(drop=True)
@@ -62,6 +45,45 @@ def agg_total_by_date(df: pd.DataFrame) -> pd.DataFrame:
     daily = df.groupby(DATE_COL, sort=True)[TARGET_COL].sum().reset_index()
     return daily
 
+def compute_school_loss_summary(
+    df: pd.DataFrame,
+    window_recent: int = 10,
+    window_baseline: int = 10,
+    pct_threshold: float = 0.10,
+) -> pd.DataFrame:
+    records = []
+
+    for (school, meal), g in df.groupby(["school_name", "meal_type"]):
+        g = g.sort_values("date")
+        if len(g) < window_recent + window_baseline:
+            continue
+
+        tail = g.tail(window_recent + window_baseline)
+        base_vals = tail.iloc[:window_baseline][TARGET_COL].values
+        recent_vals = tail.iloc[window_baseline:][TARGET_COL].values
+        baseline_mean = float(base_vals.mean())
+        recent_mean = float(recent_vals.mean())
+        if baseline_mean == 0:
+            continue
+
+        diff = recent_mean - baseline_mean
+        pct_change = diff / baseline_mean * 100.0
+        if diff > baseline_mean * pct_threshold:
+            reason = "overproduction"
+        elif diff < -baseline_mean * pct_threshold:
+            reason = "underproduction"
+        else:
+            reason = "stable"
+
+        records.append({"school_name": school,"meal_type": meal,"loss_amount": diff,"loss_pct": pct_change,"loss_reason": reason,})
+
+    if not records:
+        return pd.DataFrame(columns=["school_name", "meal_type", "loss_amount", "loss_pct", "loss_reason"])
+    loss_df = pd.DataFrame(records)
+    loss_df = loss_df[loss_df["loss_reason"] != "stable"].copy()
+    loss_df = loss_df.reindex(loss_df["loss_amount"].abs().sort_values(ascending=False).index)
+    return loss_df
+
 def business_days_between(start_date: pd.Timestamp, end_date: pd.Timestamp) -> int:
     """Return number of business days from (start_date, exclusive) to end_date (inclusive).
     If end_date <= start_date -> 0
@@ -70,15 +92,11 @@ def business_days_between(start_date: pd.Timestamp, end_date: pd.Timestamp) -> i
     end = pd.to_datetime(end_date)
     if end <= start:
         return 0
-    # pandas.bdate_range includes start if exact match; we want days AFTER start
     rng = pd.bdate_range(start + pd.offsets.BDay(1), end)
     return len(rng)
 
 @st.cache_data(show_spinner=False)
 def compute_all_school_forecasts_for_horizon(df: pd.DataFrame, k_steps: int, model_type="LSTM"):
-    """Return a DataFrame with concatenated forecasts for each (school,meal) for next k_steps.
-       This tries to call forecast_future_dates for each pair and aggregates results.
-    """
     combos = df[['school_name', 'meal_type']].drop_duplicates()
     all_outs = []
     total_failed = 0
@@ -86,22 +104,15 @@ def compute_all_school_forecasts_for_horizon(df: pd.DataFrame, k_steps: int, mod
         school = row['school_name']
         meal = row['meal_type']
         try:
-            out, bt_true, bt_pred = forecast_future_dates(
-                csv_path=CSV_PATH,
-                date_col=DATE_COL,
-                target_col=TARGET_COL,
-                k_steps=k_steps,
-                model_type=model_type,
-                model_path=MODEL_STUB,   # use our model directory
-                school_name=school,
-                meal_type=meal,
-            )
+            out, bt_true, bt_pred = forecast_future_dates(csv_path=CSV_PATH,date_col=DATE_COL,target_col=TARGET_COL,
+                            k_steps=k_steps,model_type=model_type,model_path=MODEL_STUB,
+                            school_name=school,meal_type=meal,)
             if out is not None and not out.empty:
                 all_outs.append(out)
         except Exception as e:
             total_failed += 1
-            # skip missing models / too-short series
             continue
+    
     if len(all_outs) == 0:
         return pd.DataFrame(), total_failed
     df_all = pd.concat(all_outs, ignore_index=True)
@@ -117,154 +128,250 @@ def aggregate_forecasts_for_date(df_forecasts: pd.DataFrame, target_date: pd.Tim
 
 # --- UI Layout ---
 st.title("School Production Cost — Forecasting Dashboard")
-
 df_series = load_series()
-
 left_col, right_col = st.columns([2, 1])
 
+if "forecast_df" not in st.session_state:
+    st.session_state["forecast_df"] = None
+    st.session_state["forecast_school"] = None
+    st.session_state["forecast_meal"] = None
+    st.session_state["forecast_k"] = None
+
 with left_col:
-    st.header("1) Forecast a single School + Meal")
-    school_names = sorted(df_series['school_name'].unique())
+    # --- SECTION 1: run forecast and show table ---
+    st.header("Forecast a single School + Meal")
+    school_names = sorted(df_series["school_name"].unique())
     selected_school = st.selectbox("Choose School", school_names)
-    meal_types = sorted(df_series[df_series['school_name'] == selected_school]['meal_type'].unique())
+    meal_types = sorted(df_series[df_series["school_name"] == selected_school]["meal_type"].unique())
     selected_meal = st.selectbox("Choose Meal Type", meal_types)
-    k_steps = st.number_input("Days to forecast (business days)", min_value=1, max_value=60, value=10, step=1)
+    k_steps = st.number_input("Days to forecast (business days)",min_value=1,max_value=60,value=10,step=1)
     run_forecast_btn = st.button("Run Forecast for this School")
 
     if run_forecast_btn:
-        with st.spinner(f"Forecasting {selected_school} / {selected_meal} for {k_steps} days..."):
+        with st.spinner(
+            f"Forecasting {selected_school} / {selected_meal} for {k_steps} days..."
+        ):
             try:
-                out, bt_true, bt_pred = forecast_future_dates(
-                csv_path=CSV_PATH,
-                date_col=DATE_COL,
-                target_col=TARGET_COL,
-                k_steps=k_steps,
-                model_type="LSTM",
-                model_path=MODEL_STUB,
-                school_name=selected_school,
-                meal_type=selected_meal,
-                )
-                st.success(f"Forecast produced: {len(out)} rows")
-                st.subheader("Forecast table")
-                st.dataframe(out)
-
-                # Historical series for selected school+meal
-                df_sm = df_series[(df_series['school_name'] == selected_school) & (df_series['meal_type'] == selected_meal)].copy()
-                # combine historic & forecast for plotting
-                hist_dates = pd.to_datetime(df_sm[DATE_COL])
-                hist_vals = df_sm[TARGET_COL].values
-
-                fdates = pd.to_datetime(out['forecast_date'])
-                fvals = out[TARGET_COL].values
-
-                fig_df = pd.DataFrame({
-                    'date': np.concatenate([hist_dates.values, fdates.values]),
-                    'value': np.concatenate([hist_vals, fvals]),
-                    'type': ['hist'] * len(hist_dates) + ['forecast'] * len(fdates),
-                })
-                fig = px.line(fig_df, x='date', y='value', color='type', markers=True,
-                              title=f"{selected_school} — {selected_meal}: Historical + Forecast")
-                st.plotly_chart(fig, use_container_width=True)
-
-                # show backtest (if available)
-                if bt_true is not None and bt_pred is not None:
-                    st.subheader("Backtest (last k-step true vs predicted)")
-                    bt_df = pd.DataFrame({'true': bt_true, 'pred': bt_pred})
-                    st.write(bt_df)
-                    fig2 = px.scatter(bt_df, x='true', y='pred', title="Backtest: True vs Pred")
-                    st.plotly_chart(fig2, use_container_width=True)
+                out, _, _ = forecast_future_dates(csv_path=CSV_PATH,date_col=DATE_COL,target_col=TARGET_COL,
+                                        k_steps=k_steps,model_type="LSTM",model_path=MODEL_STUB,
+                                        school_name=selected_school,meal_type=selected_meal)
+                
+                st.session_state["forecast_df"] = out
+                st.session_state["forecast_school"] = selected_school
+                st.session_state["forecast_meal"] = selected_meal
+                st.session_state["forecast_k"] = k_steps
 
             except Exception as e:
                 st.error(f"Forecast failed: {e}")
 
+    if st.session_state["forecast_df"] is not None:
+        st.success(
+            f"Forecast produced for {st.session_state['forecast_school']} / "
+            f"{st.session_state['forecast_meal']} for "
+            f"{st.session_state['forecast_k']} business day(s)."
+        )
+        st.subheader("Forecast table")
+        df_show = st.session_state["forecast_df"].copy()
+        if "forecast_date" in df_show.columns:
+            df_show["forecast_date"] = pd.to_datetime(df_show["forecast_date"]).dt.date
+
+        st.dataframe(df_show)
     st.markdown("---")
-    st.header("2) Per-school Train/Test/Forecast plot")
-    st.info("If you have a train/test/forecast image per school, upload it or use example.")
-    uploaded_file = st.file_uploader("Upload train/test plot image (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
-    use_uploaded = False
-    if uploaded_file is not None:
-        # display uploaded image immediately
-        st.image(uploaded_file, caption="Uploaded Train/Test/Forecast", use_column_width=True)
-        use_uploaded = True
+
+    # --- SECTION 2: plot for the same school + meal ---
+    st.header("Historical + Forecast plot for selected School + Meal")
+
+    if st.session_state["forecast_df"] is None:
+        st.info("Run a forecast above to see the plot for that school and meal here.")
     else:
-        if os.path.exists(TRAIN_TEST_IMAGE):
-            show_example = st.checkbox("Show example train/test/forecast image", value=True)
-            if show_example:
-                st.image(TRAIN_TEST_IMAGE, caption="Example Train/Test/Forecast", use_column_width=True)
+        school = st.session_state["forecast_school"]
+        meal = st.session_state["forecast_meal"]
+        fc_df = st.session_state["forecast_df"]
+
+        # historical series for this school + meal
+        df_hist = df_series[(df_series["school_name"] == school)& (df_series["meal_type"] == meal)].copy()
+        df_hist = df_hist.sort_values(DATE_COL)
+
+        # build combined dataframe
+        hist_plot = df_hist[[DATE_COL, TARGET_COL]].copy()
+        hist_plot["source"] = "Historical"
+        hist_plot = hist_plot.rename(columns={DATE_COL: "date_plot"})
+        fc_plot = fc_df[["forecast_date", TARGET_COL]].copy()
+        fc_plot["source"] = "Forecast"
+        fc_plot = fc_plot.rename(columns={"forecast_date": "date_plot"})
+        plot_df = pd.concat([hist_plot, fc_plot], ignore_index=True)
+
+        fig = px.line(plot_df,x="date_plot",y=TARGET_COL,color="source",title=f"{school} – {meal}: Historical and Forecast Production Cost",)
+        st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
+    
+    # SECTION 3: Top Production Cost Schools
+    st.header("Top Production Cost Schools")
+    top_n = st.slider("Top N schools to show (by mean production cost)",min_value=3,max_value=30,value=10,)
+    school_agg = (df_series.groupby("school_name")[TARGET_COL].mean().sort_values(ascending=False).reset_index())
+    top_schools = school_agg.head(top_n)
+    fig = px.bar(top_schools,x="school_name",y=TARGET_COL,title=f"Top {top_n} Schools by Average Production Cost",)
+    st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
+
+    # Section 4: School Loss Analysis
+    st.header("🏫 School Loss Analysis")
+    loss_threshold_pct = st.slider(
+        "Percent change threshold to flag over/under production (%)",min_value=1,
+        max_value=50,value=10,
+        help="Compares recent average cost to a baseline window for each school + meal.",)
+
+    loss_df = compute_school_loss_summary(df_series,window_recent=10,window_baseline=10,pct_threshold=loss_threshold_pct / 100.0,)
+
+    if loss_df.empty:
+        st.success("No schools show significant over- or under-production based on the selected threshold ✅")
+    else:
+        st.warning("Some schools appear to be losing money due to overproduction or underproduction.")
+
+        cols = [
+            c
+            for c in ["school_name", "meal_type", "loss_amount", "loss_pct", "loss_reason"]
+            if c in loss_df.columns
+        ]
+
+        st.subheader("Loss summary by school and meal")
+        st.dataframe(loss_df[cols], use_container_width=True)
+        fig_loss = px.bar(loss_df,x="school_name",y="loss_amount",
+                color="loss_reason",title="Schools with Over/Under Production (recent vs baseline)",
+                labels={"loss_amount": "Change in average daily cost"},)
+        fig_loss.update_layout(xaxis_tickangle=-45)
+        st.plotly_chart(fig_loss, use_container_width=True)
 
 with right_col:
-    st.header("3) Top Production Cost Schools")
-    top_n = st.slider("Top N schools to show (by mean production cost)", min_value=3, max_value=30, value=10)
-    # compute per-school aggregated metric
-    school_agg = df_series.groupby('school_name')[TARGET_COL].mean().sort_values(ascending=False).reset_index()
-    top_schools = school_agg.head(top_n)
-    fig = px.bar(top_schools, x='school_name', y=TARGET_COL, title=f"Top {top_n} Schools by Average Production Cost")
-    st.plotly_chart(fig, use_container_width=True)
+    # --- DATASET OVERVIEW ---
+    st.subheader("Dataset overview")
 
-    st.write("Click a school to drill down (choose from dropdown):")
-    drill_school = st.selectbox("Select school to drill down", top_schools['school_name'].tolist())
-    drill_meal_types = sorted(df_series[df_series['school_name'] == drill_school]['meal_type'].unique())
-    drill_meal = st.selectbox("Choose meal type for drill-down", drill_meal_types)
-    if st.button("Show drill-down series"):
-        df_drill = df_series[(df_series['school_name'] == drill_school) & (df_series['meal_type'] == drill_meal)]
-        fig2 = px.line(df_drill, x=DATE_COL, y=TARGET_COL, title=f"{drill_school} ({drill_meal}) historical")
-        st.plotly_chart(fig2, use_container_width=True)
+    n_schools = df_series["school_name"].nunique()
+    n_meal_types = df_series["meal_type"].nunique()
+    n_rows = len(df_series)
+    min_date = pd.to_datetime(df_series[DATE_COL].min())
+    max_date = pd.to_datetime(df_series[DATE_COL].max())
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.metric("Number of schools", n_schools)
+        st.metric("Meal types", n_meal_types)
+    with c2:
+        st.metric("Total records", n_rows)
+        st.metric("Date range", f"{min_date.date()} → {max_date.date()}")
 
     st.markdown("---")
-    st.header("4) Forecast total production cost across ALL schools for a selected future date")
-    # choose a date to forecast total
-    max_hist_date = df_series[DATE_COL].max()
-    st.write(f"Latest historical date available: **{pd.to_datetime(max_hist_date).date()}**")
-    pick_date = st.date_input("Select future date to estimate total production cost", value=(pd.to_datetime(max_hist_date) + pd.offsets.BDay(7)).date())
-    k_days_ahead = business_days_between(max_hist_date, pick_date)
 
-    if st.button("Compute Total Forecast for Selected Date"):
-        if k_days_ahead == 0:
-            st.warning("Selected date is not after last historical date — choose a later business date.")
+    # --- HISTORICAL TREND (ALL SCHOOLS) ---
+    st.subheader("District-wide historical production cost")
+
+    daily_totals = (
+        df_series.groupby(DATE_COL, sort=True)[TARGET_COL]
+        .sum()
+        .reset_index()
+    )
+    st.line_chart(
+        daily_totals.set_index(DATE_COL)[TARGET_COL],
+        height=200,
+    )
+    st.caption("Total daily production cost across all schools and meals.")
+    st.markdown("---")
+    # --- SELECTED SCHOOL + MEAL SNAPSHOT ---
+    st.subheader("Selected school + meal snapshot")
+    df_sel = df_series[(df_series["school_name"] == selected_school)& (df_series["meal_type"] == selected_meal)].copy()
+    if df_sel.empty:
+        st.info("No historical data for the selected school and meal.")
+    else:
+        avg_cost = df_sel[TARGET_COL].mean()
+        min_cost = df_sel[TARGET_COL].min()
+        max_cost = df_sel[TARGET_COL].max()
+        latest_row = df_sel.sort_values(DATE_COL).iloc[-1]
+        latest_date = pd.to_datetime(latest_row[DATE_COL])
+        latest_cost = latest_row[TARGET_COL]
+
+        m1, m2 = st.columns(2)
+        with m1:
+            st.metric("Average daily cost", f"${avg_cost:,.0f}")
+            st.metric("Min daily cost", f"${min_cost:,.0f}")
+        with m2:
+            st.metric("Max daily cost", f"${max_cost:,.0f}")
+            st.metric(
+                "Most recent cost",
+                f"${latest_cost:,.0f}",
+                help=f"Last date in data: {latest_date.date()}",
+            )
+        # last 10 days mini chart
+        df_last = (df_sel.sort_values(DATE_COL).tail(10)[[DATE_COL, TARGET_COL]].copy())
+        df_last = df_last.set_index(DATE_COL)
+        st.line_chart(df_last[TARGET_COL], height=180)
+        st.caption("Last 10 historical days for this school and meal.")
+        st.markdown("---")
+        # --- TOP 5 OVER / UNDER PRODUCTION SUMMARY ---
+        st.subheader("Top 5 over / under production schools")
+        loss_df_small = compute_school_loss_summary(df_series,window_recent=10,window_baseline=10,pct_threshold=0.10,)
+        if loss_df_small.empty:
+            st.info("No significant over- or under-production detected.")
         else:
-            st.info(f"Computing aggregated forecasts for next {k_days_ahead} business day(s). This may take a while.")
-            with st.spinner("Running per-school forecasts (aggregating)..."):
-                df_all_forecasts, failed = compute_all_school_forecasts_for_horizon(df_series, k_steps=k_days_ahead, model_type="LSTM")
-            if df_all_forecasts.empty:
-                st.error("No per-school forecasts could be generated (maybe model files missing).")
-            else:
-                total_for_date = aggregate_forecasts_for_date(df_all_forecasts, pick_date)
-                if math.isnan(total_for_date):
-                    st.warning("No forecasts matched the selected date (maybe models skipped some schools).")
+            over = loss_df_small[loss_df_small["loss_amount"] > 0].head(5)
+            under = loss_df_small[loss_df_small["loss_amount"] < 0].head(5)
+            c3, c4 = st.columns(2)
+            with c3:
+                st.caption("Overproduction (higher recent cost)")
+                if over.empty:
+                    st.text("None")
                 else:
-                    st.success(f"Estimated total production cost across all schools for {pick_date}: {total_for_date:,.2f}")
-                st.write(f"[Info] Per-school forecast models failed / skipped: {failed}")
+                    st.dataframe(over[["school_name", "meal_type", "loss_amount"]],use_container_width=True,height=200,)
+            with c4:
+                st.caption("Underproduction (lower recent cost)")
+                if under.empty:
+                    st.text("None")
+                else:
+                    st.dataframe(under[["school_name", "meal_type", "loss_amount"]],use_container_width=True,height=200,)
+    
+    # Total Forecasted Production Cost (sum over horizon) 
+    st.header("Total Forecasted Production Cost — All Schools")
+    horizon_all = st.slider(
+        "Horizon (business days) to forecast across all schools",
+        min_value=1,
+        max_value=60,
+        value=10,
+    )
 
-st.markdown("---")
-st.header("5) Historical total production cost & aggregated forecasts")
-daily_totals = agg_total_by_date(df_series)
-st.line_chart(daily_totals.set_index(DATE_COL)[TARGET_COL])
+    if st.button("Compute total forecast for ALL schools"):
+        with st.spinner(
+            f"Running LSTM forecasts for all schools and meals for next {horizon_all} business day(s)..."
+        ):
+            df_all_forecasts, failed = compute_all_school_forecasts_for_horizon(df_series,k_steps=horizon_all,model_type="LSTM",)
 
-col_a, col_b = st.columns(2)
-with col_a:
-    st.subheader("Produce aggregated K-day forecast (all schools) and plot")
-    k_horizon = st.number_input("Horizon (business days) to forecast total across all schools", min_value=1, max_value=60, value=10, step=1)
-    if st.button("Compute aggregated horizon forecast"):
-        with st.spinner("Generating per-school forecasts and summing..."):
-            df_all_forecasts, failed = compute_all_school_forecasts_for_horizon(df_series, k_steps=k_horizon, model_type="LSTM")
         if df_all_forecasts.empty:
-            st.error("No forecasts produced (likely missing per-school model files).")
+            st.error(
+                "No forecasts were produced. This usually means per-school model files "
+                "are missing for many schools."
+            )
         else:
-            # aggregate per unique forecast date
-            agg = df_all_forecasts.groupby('forecast_date')[TARGET_COL].sum().reset_index().sort_values('forecast_date')
-            st.subheader("Aggregated forecast (total across all schools)")
-            st.dataframe(agg)
-            fig3 = px.line(agg, x='forecast_date', y=TARGET_COL, title=f"Aggregated forecast for next {k_horizon} business days")
-            st.plotly_chart(fig3, use_container_width=True)
-            st.write(f"[Info] Some per-school forecasts failed/skipped: {failed}")
 
-with col_b:
+            total_cost_all = df_all_forecasts[TARGET_COL].sum()
+            st.markdown(
+                "### 📦 TOTAL Forecasted Production Cost "
+                "(all schools, sum over horizon)"
+            )
+            st.markdown(f"## ${total_cost_all:,.2f}")
+            st.caption(f"Per-school forecasts failed or skipped: {failed}")
+    st.markdown("---")
+    
+    # --- USEFUL DOWNLOADS & DIAGNOSTICS ---
     st.subheader("Useful downloads & diagnostics")
-    if st.button("Download historical totals (CSV)"):
-        tmp = daily_totals.copy()
-        tmp[DATE_COL] = pd.to_datetime(tmp[DATE_COL]).dt.date
-        csv = tmp.to_csv(index=False)
-        st.download_button("Download CSV", csv, file_name="historical_totals.csv", mime="text/csv")
+
+    tmp = daily_totals.copy()
+    tmp[DATE_COL] = pd.to_datetime(tmp[DATE_COL]).dt.date
+    csv = tmp.to_csv(index=False)
+    st.download_button(
+        "Download historical totals (CSV)",
+        csv,
+        file_name="historical_totals.csv",
+        mime="text/csv",
+    )
+    st.markdown("---")
 
 st.sidebar.header("Suggestions & Next features you can add")
 st.sidebar.markdown("""
