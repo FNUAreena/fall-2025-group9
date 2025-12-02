@@ -1,6 +1,14 @@
 # 🍽️ Forecasting School Meal Production Costs: A Comparative Study of Machine Learning and Deep Learning Time-Series Models
 
-An AI-powered food service analytics platform designed to help Fairfax County Public Schools (FCPS) improve forecasting accuracy, reduce food waste, optimize production, and reduce operational costs using Machine Learning, LSTM/GRU deep learning models, XGBoost, and an interactive Streamlit dashboard.
+This project builds an AI-powered food service analytics system for Fairfax County Public Schools (FCPS).
+It predicts daily meal production costs, analyzes waste patterns, and supports operational planning using:
+LSTM / GRU Deep Learning
+XGBoost
+Linear Regression
+Feed-Forward Neural Networks
+An interactive Streamlit dashboard
+The goal is simple:
+👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
 
 ---
 
@@ -248,8 +256,9 @@ src/forecasting.py
 **1. HTML → CSV Preprocessing**
 
 ```
-cd src
-python preprocess_html.py
+cd src/maincode
+python combine_csv.py
+
 ```
 This script:
 
@@ -260,16 +269,16 @@ This script:
 - Generates:
 
 ```
-Data/Output/breakfast_combined.csv
-Data/Output/lunch_combined.csv
-Data/Output/meals_combined.csv
+src/Data/Output/breakfast_combined.csv
+src/Data/Output/lunch_combined.csv
+src/Data/Output/meals_combined.csv
 ```
 
 **2. Univariate Forecasting**
 
 ```
-cd src/component
-python univariate/main.py
+cd src/component/univariate
+python app.py
 ```
 
 This will:
