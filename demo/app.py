@@ -372,5 +372,3 @@ st.sidebar.markdown("""
 
 st.sidebar.markdown("---")
 st.sidebar.write("App note: per-school forecasting requires saved per-school model files created by `training.py`. If many models are missing the aggregation steps will skip those schools (you'll see counts).")
-
-st.markdown("### End of Dashboard")
