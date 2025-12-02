@@ -247,9 +247,13 @@ pip install -r requirements.txt
 Important source files: 
 
 ```
-src/utils.py
-src/model.py
-src/forecasting.py
+src/component/preprocess.py     
+src/component/EDA.py            
+src/component/univariate/        
+src/component/multivariate/     
+src/maincode/combine_csv.py     
+src/maincode/main.py          
+
 ```
 
 ### ▶️ Running the Application
@@ -283,21 +287,23 @@ python app.py
 
 This will:
 
+- Load the cleaned dataset from src/Data/Output/meals_combined.csv
 - Aggregate total district production cost per day
 - Create sliding windows
 - Train LSTM/GRU
 - Save model + plots into:
 
 ```
-univariate/results/
-univariate/plots/
+demo/images/univariate_plots/
+
 ```
 
 **3. Multivariate Forecasting**
 
 ```
-cd src/component
-python multivariate/main.py
+cd src/component/multivariate
+python training.py
+
 ```
 - Uses features:
 - served_total
@@ -309,15 +315,15 @@ production_cost_total
 - Models saved to:
 
 ```
-multivariate/results/
-multivariate/plots/
+demo/images/multivariate_plots/
 ```
 
 **4. Model Comparison**
 
 ```
-cd src/component
-python univariate/comparing_model.py
+cd src/component/univariate
+python comparing_model.py
+
 ```
 
 This evaluates:
@@ -329,18 +335,28 @@ This evaluates:
 - Outputs saved into:
 
 ```
-univariate/results/
-univariate/plots/
+demo/images/univariate_plots/
 ```
 
 **5. Important Source Files**
 
 ```
 src/
-├── preprocess_html.py          # HTML → CSV parser
-├── utils.py                    # Preprocessing + cleaning helpers
-├── model.py                    # LSTM/GRU model classes
-└── forecasting.py              # Multi-step forecasting logic
+├── Data/
+│   ├── Html/                   # Raw HTML production records
+│   └── Output/                 # Combined CSVs (breakfast, lunch, meals)
+│
+├── component/
+│   ├── preprocess.py           # Data cleaning & preprocessing helpers
+│   ├── EDA.py                  # Exploratory data analysis
+│   ├── univariate/             # Univariate forecasting models & utilities
+│   └── multivariate/           # Multivariate forecasting models & utilities
+│
+├── maincode/
+│   ├── combine_csv.py          # Orchestrates HTML → CSV merging
+│   ├── univariate_main.py      # Entry script for univariate pipeline
+│   └── multivariate_main.py    # Entry script for multivariate pipeline
+
 ```
 # ✅ 📊 Dashboard (Streamlit App)
 
