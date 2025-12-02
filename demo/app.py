@@ -359,19 +359,6 @@ with right_col:
             st.caption(f"Per-school forecasts failed or skipped: {failed}")
     st.markdown("---")
     
-    # --- USEFUL DOWNLOADS & DIAGNOSTICS ---
-    st.subheader("Useful downloads & diagnostics")
-
-    tmp = daily_totals.copy()
-    tmp[DATE_COL] = pd.to_datetime(tmp[DATE_COL]).dt.date
-    csv = tmp.to_csv(index=False)
-    st.download_button(
-        "Download historical totals (CSV)",
-        csv,
-        file_name="historical_totals.csv",
-        mime="text/csv",
-    )
-    st.markdown("---")
 
 st.sidebar.header("Suggestions & Next features you can add")
 st.sidebar.markdown("""
