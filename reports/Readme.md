@@ -23,7 +23,7 @@ reports/
 │    ├── Progress_Report.md
 │    └── img_2.png
 |
-|── Word_Report/      
-│       ├── Final Report.docx
+|── Word_Report/   
+│    └── Final Report.docx  
 
 ```
