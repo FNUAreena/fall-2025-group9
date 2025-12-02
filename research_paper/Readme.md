@@ -4,6 +4,7 @@
 research_paper
          ├── Latex
          │     ├── fig
+         │     │     └── images
          │     ├── mybib.bib
          │     ├── research_paper.pdf
          │     └── research_paper.tex
