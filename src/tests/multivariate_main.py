@@ -15,7 +15,9 @@ warnings.filterwarnings("ignore")
 torch.manual_seed(42)
 
 def load_and_preprocess_data():
-    df = pd.read_csv("src/Data/Output/meals_combined.csv")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    CSV_PATH = os.path.join(current_dir, '..', 'Data', 'Output', 'meals_combined.csv')
+    df = pd.read_csv(CSV_PATH)
     if 'date' in df.columns:
         df['date'] = pd.to_datetime(df['date'], dayfirst=True)
         df = df.sort_values(['school_name', 'meal_type', 'date'])
