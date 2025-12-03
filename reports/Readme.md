@@ -1,3 +1,14 @@
+# Overview
+
+This folder serves as the documentation hub for the entire project.
+It includes:
+- Draft and final versions of the main capstone report
+- Progress reports submitted at different stages
+- Markdown notes and structure files to support writing and formatting
+- Figures, tables, and explanations used across the written reports
+  
+These documents align with GWU’s capstone deliverable requirements and provide a complete written record of the problem, dataset, pipeline, models, results, and conclusions.
+
 ## Report Folder
 
 ```
