@@ -286,6 +286,11 @@ Before opening the dashboard, you must generate the data:
 ```
 python src/maincode/main.py
 ```
+## Download Instructions Navigate to:
+
+LSTM Models: https://drive.google.com/drive/folders/1daVVcrvS2u6rFBcKG_RjkQJh6Q19z4P7?usp=drive_link
+GRU Models: https://drive.google.com/drive/folders/1KtWlLppDeVkl30KRoWk2DoWPzYHRoRkN?usp=drive_link
+Camparing_Models: https://drive.google.com/drive/folders/1GFUuX3pHYzUkceX-JBETsv6FtPSd_x0M?usp=drive_link
 
 # ✅ 📊 Dashboard (Streamlit App)
 
@@ -301,7 +306,7 @@ streamlit run demo/app.py
 ```
 ├── demo
 │   ├── fig
-│   │   └── .gitkeep
+│   │   └── Video.mp4
 │   │
 │   ├── images
 │   │   ├── multivariate_plots
