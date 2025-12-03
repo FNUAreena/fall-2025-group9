@@ -1,6 +1,7 @@
 # 🍽️ Forecasting School Meal Production Costs: A Comparative Study of Machine Learning and Deep Learning Time-Series Models
 
 This project develops a time-series forecasting system for Fairfax County Public Schools (FCPS) to estimate daily meal production costs and analyze waste-related patterns. It compares multiple machine learning and deep learning models—including LSTM, GRU, XGBoost, Linear Regression, and Feed-Forward Neural Networks—and visualizes the results through an interactive Streamlit dashboard.
+
 The goal is simple:
 👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
 
@@ -212,30 +213,40 @@ Models:
 - Linear Regression  
 - XGBoost  
 - FeedForwardNN  
-- GRU (sequence-based, school-wise)  
+- GRU (sequence-based, school-wise) 
+- LSTM 
 
 ---
 
 # 🚀 Getting Started
 
 ### ✔️ Prerequisites
+## Module Installation
+
+You can install the following modules through pip
+```bash
+pip install -r src/requirements.txt
+```
 Install:
 
 - Python 3.10+  
-- pip  
-- Streamlit  
+- pip   
 - PyTorch  
-- XGBoost  
+- XGBoost
+- pandas
+- numpy
+- beautifulsoup4
+- lxml
+- pdfplumber
+- PyPDF2
+- tqdm
+- statsmodels
+- scikit-learn
+- matplotlib
+- streamlit 
 
----
 
-### 📦 Installation
 
-```bash
-git clone https://github.com/FNUAreena/fall-2025-group9
-cd fall-2025-group9
-pip install -r requirements.txt
-```
 
 ### 🌱 Environment Setup
 Important source files: 
@@ -245,17 +256,15 @@ src/component/preprocess.py
 src/component/EDA.py            
 src/component/univariate/        
 src/component/multivariate/     
-src/maincode/combine_csv.py     
-src/maincode/main.py          
+src/tests/combine_csv.py     
+src/maincode/main.py         
 
 ```
 
-### ▶️ Running the Application
-**1. HTML → CSV Preprocessing**
+## HTML → CSV Preprocessing
 
 ```
-cd src/maincode
-python combine_csv.py
+python src/tests/combine_csv.py
 
 ```
 This script:
@@ -272,84 +281,12 @@ src/Data/Output/lunch_combined.csv
 src/Data/Output/meals_combined.csv
 ```
 
-**2. Univariate Forecasting**
+## Run the Data Pipeline 
+
+Before opening the dashboard, you must generate the data:
 
 ```
-cd src/component/univariate
-python app.py
-```
-
-This will:
-
-- Load the cleaned dataset from src/Data/Output/meals_combined.csv
-- Aggregate total district production cost per day
-- Create sliding windows
-- Train LSTM/GRU
-- Save model + plots into:
-
-```
-demo/images/univariate_plots/
-
-```
-
-**3. Multivariate Forecasting**
-
-```
-cd src/component/multivariate
-python training.py
-
-```
-- Uses features:
-- served_total
-- planned_total
-- discarded_total
-- left_over_total
-- And predicts:
-production_cost_total
-- Models saved to:
-
-```
-demo/images/multivariate_plots/
-```
-
-**4. Model Comparison**
-
-```
-cd src/component/univariate
-python comparing_model.py
-
-```
-
-This evaluates:
-- Linear Regression
-- XGBoost
-- Feed-Forward Neural Network
-- LSTM
-- GRU
-- Outputs saved into:
-
-```
-demo/images/univariate_plots/
-```
-
-**5. Important Source Files**
-
-```
-src/
-├── Data/
-│   ├── Html/              
-│   └── Output/                 
-│
-├── component/
-│   ├── preprocess.py           
-│   ├── EDA.py                  
-│   ├── univariate/            
-│   └── multivariate/           
-│
-├── maincode/
-│   ├── combine_csv.py               
-│   └── main.py    
-
+python src/maincode/main.py
 ```
 
 # ✅ 📊 Dashboard (Streamlit App)
@@ -358,22 +295,117 @@ Our interactive FCPS Meal Analytics Dashboard provides real-time insights into s
 Run the full interactive dashboard
 
 ```
-streamlit run app_dashboard_nav.py
+streamlit run demo/app.py
 ```
 
-### 🔍 Includes
+## Folder Structure
 
-✔ School-wise analysis
+├── demo
+│   ├── fig
+│   │   └── .gitkeep
+│   │
+│   ├── images
+│   │   ├── multivariate_plots
+│   │   │   ├── GRU.png
+│   │   │   ├── LSTM.png
+│   │   │   ├── fnn_model.png
+│   │   │   ├── linear_regression.png
+│   │   │   └── xgboost_model.png
+│   │   │
+│   │   └── univariate_plots
+│   │       ├── GRU.png
+│   │       ├── LSTM.png
+│   │       ├── LSTM_train_test_forecast_example.png
+│   │       ├── fnn_model.png
+│   │       ├── linear_regression.png
+│   │       └── xgboost_model.png
+│   │
+│   ├── .gitkeep
+│   └── app.py
+│
+├── presentation
+│   ├── .gitkeep
+│   └── Capstone.ppt
+│
+├── reports
+│   ├── Latex_report
+│   │   ├── fig
+│   │   ├── File_Setup.tex
+│   │   ├── Report_PDF.pdf
+│   │   ├── references.bib
+│   │   └── word_report.text
+│   │
+│   ├── Markdown_Report
+│   │   └── .gitkeep
+│   │
+│   ├── Progress_Report
+│   │   ├── Markdown_CheatSheet
+│   │   │   ├── Markdown1.pdf
+│   │   │   ├── Markdown2.pdf
+│   │   │   ├── Markdown3.pdf
+│   │   │   └── Markdown4.pdf
+│   │   │
+│   │   ├── Progress_Report.md
+│   │   └── img_2.png
+│   │
+│   └── Word_Report
+│       └── Final Report.docx
+│
+├── research_paper
+│   ├── Latex
+│   │   ├── fig
+│   │   │   └── images
+│   │   ├── mybib.bib
+│   │   ├── research_paper.pdf
+│   │   └── research_paper.tex
+│   │
+│   ├── Word
+│   │   └── Conference-template-A4.doc
+│   │
+│   └── .DS_Store
+│
+└── src
+    ├── Data
+    │   ├── Html
+    │   │   ├── May 2025 Breakfast production records
+    │   │   └── May 2025 Lunch production records
+    │   │
+    │   └── Output
+    │       ├── breakfast_combined.csv
+    │       ├── lunch_combined.csv
+    │       └── meals_combined.csv
+    │
+    ├── component
+    │   ├── EDA.py
+    │   ├── preprocess.py
+    │   │
+    │   ├── multivariate
+    │   │   ├── model.py
+    │   │   ├── plot.py
+    │   │   ├── training.py
+    │   │   └── utils.py
+    │   │
+    │   └── univariate
+    │       ├── comparing_model.py
+    │       ├── forecasting.py
+    │       ├── model.py
+    │       ├── plot.py
+    │       ├── training.py
+    │       └── utils.py
+    │
+    ├── maincode
+    │   └── main.py
+    │
+    ├── results
+    │   └── all_school_meal_forecasts.csv
+    │
+    ├── tests
+    │   ├── combine_csv.py
+    │   └── multivariate_main.py
+    │
+    ├── .gitkeep
+    └── requirements.txt
 
-✔ Waste heatmap
-
-✔ What-if prediction sliders
-
-✔ LSTM vs GRU comparison
-
-✔ Loss-making school detection
-
-✔ Forecast charts by date & school
 
 
 # 📡 API Endpoints
