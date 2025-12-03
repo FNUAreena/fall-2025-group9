@@ -1,8 +1,10 @@
 # 🍽️ Forecasting School Meal Production Costs: A Comparative Study of Machine Learning and Deep Learning Time-Series Models
 
 This project develops a time-series forecasting system for Fairfax County Public Schools (FCPS) to estimate daily meal production costs and analyze waste-related patterns. It compares multiple machine learning and deep learning models—including LSTM, GRU, XGBoost, Linear Regression, and Feed-Forward Neural Networks—and visualizes the results through an interactive Streamlit dashboard.
-The goal is simple:
-👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
+
+### 🎯 Project Goal
+To develop a predictive system that enables FCPS to reduce food waste, improve budgetary planning, and optimize operational efficiency by forecasting daily school meal production costs using machine learning and deep learning models.
+
 
 ---
 
