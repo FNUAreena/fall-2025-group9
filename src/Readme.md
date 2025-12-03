@@ -49,3 +49,14 @@ src/
 └── requirements.txt
 ,,,
 
+
+🚀 How to Run
+To execute the full pipeline and generate fresh outputs for the dashboard:
+
+Ensure prerequisites are installed (see root README).
+
+Run the Main Driver:
+```bash
+python src/maincode/main.py
+```
+(Note: Adjust the path based on your current working directory)
