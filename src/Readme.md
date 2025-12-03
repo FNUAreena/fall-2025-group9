@@ -5,9 +5,9 @@
 src
 ├── Data
 │   ├── Html
-│   │   ├── May 2025 Breakfast production records/
+│   │   ├── May 2025 Breakfast production records
 │   │   │   (all daily *.html breakfast files)
-│   │   └── May 2025 Lunch production records/
+│   │   └── May 2025 Lunch production records
 │   │       (all daily *.html lunch files)
 │   │
 │   └── Output
