@@ -35,7 +35,7 @@ streamlit run demo/app.py
   ```
 demo
 ├── fig
-│   └── video.mp4
+│   └── Video.mp4
 │
 ├── images
 │   ├── multivariate_plots
