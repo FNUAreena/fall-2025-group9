@@ -1,6 +1,8 @@
 # 🍽️ Forecasting School Meal Production Costs: A Comparative Study of Machine Learning and Deep Learning Time-Series Models
 
-An AI-powered food service analytics platform designed to help Fairfax County Public Schools (FCPS) improve forecasting accuracy, reduce food waste, optimize production, and reduce operational costs using Machine Learning, LSTM/GRU deep learning models, XGBoost, and an interactive Streamlit dashboard.
+This project develops a time-series forecasting system for Fairfax County Public Schools (FCPS) to estimate daily meal production costs and analyze waste-related patterns. It compares multiple machine learning and deep learning models—including LSTM, GRU, XGBoost, Linear Regression, and Feed-Forward Neural Networks—and visualizes the results through an interactive Streamlit dashboard.
+The goal is simple:
+👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
 
 ---
 
@@ -61,7 +63,7 @@ Our pipeline transforms raw FCPS Production Records + POS data → **clean, stru
 
 ---
 
-### **1️⃣ HTML → CSV Parser (`preprocess_html.py`)**
+### **1️⃣ HTML → CSV Parser**
 
 ✔ Reads dozens of messy FCPS breakfast & lunch HTML files  
 ✔ Auto-detects school sections  
@@ -71,13 +73,13 @@ Our pipeline transforms raw FCPS Production Records + POS data → **clean, stru
 
 **Outputs generated:**
 
-- `breakfast_combined.csv`  
-- `lunch_combined.csv`  
-- `meals_combined.csv`  
+- `src/Data/Output/breakfast_combined.csv`  
+- `src/Data/Output/lunch_combined.csv`  
+- `src/Data/Output/meals_combined.csv` 
 
 ---
 
-### **2️⃣ Data Cleaning & Preprocessing (`utils.preprocess`)**
+### **2️⃣ Data Cleaning & Preprocessing **
 
 ✔ Cleans `$` & `%` → float  
 ✔ Converts & sorts dates  
@@ -239,17 +241,22 @@ pip install -r requirements.txt
 Important source files: 
 
 ```
-src/utils.py
-src/model.py
-src/forecasting.py
+src/component/preprocess.py     
+src/component/EDA.py            
+src/component/univariate/        
+src/component/multivariate/     
+src/maincode/combine_csv.py     
+src/maincode/main.py          
+
 ```
 
 ### ▶️ Running the Application
 **1. HTML → CSV Preprocessing**
 
 ```
-cd src
-python preprocess_html.py
+cd src/maincode
+python combine_csv.py
+
 ```
 This script:
 
@@ -260,35 +267,37 @@ This script:
 - Generates:
 
 ```
-Data/Output/breakfast_combined.csv
-Data/Output/lunch_combined.csv
-Data/Output/meals_combined.csv
+src/Data/Output/breakfast_combined.csv
+src/Data/Output/lunch_combined.csv
+src/Data/Output/meals_combined.csv
 ```
 
 **2. Univariate Forecasting**
 
 ```
-cd src/component
-python univariate/main.py
+cd src/component/univariate
+python app.py
 ```
 
 This will:
 
+- Load the cleaned dataset from src/Data/Output/meals_combined.csv
 - Aggregate total district production cost per day
 - Create sliding windows
 - Train LSTM/GRU
 - Save model + plots into:
 
 ```
-univariate/results/
-univariate/plots/
+demo/images/univariate_plots/
+
 ```
 
 **3. Multivariate Forecasting**
 
 ```
-cd src/component
-python multivariate/main.py
+cd src/component/multivariate
+python training.py
+
 ```
 - Uses features:
 - served_total
@@ -300,15 +309,15 @@ production_cost_total
 - Models saved to:
 
 ```
-multivariate/results/
-multivariate/plots/
+demo/images/multivariate_plots/
 ```
 
 **4. Model Comparison**
 
 ```
-cd src/component
-python univariate/comparing_model.py
+cd src/component/univariate
+python comparing_model.py
+
 ```
 
 This evaluates:
@@ -320,19 +329,29 @@ This evaluates:
 - Outputs saved into:
 
 ```
-univariate/results/
-univariate/plots/
+demo/images/univariate_plots/
 ```
 
 **5. Important Source Files**
 
 ```
 src/
-├── preprocess_html.py          # HTML → CSV parser
-├── utils.py                    # Preprocessing + cleaning helpers
-├── model.py                    # LSTM/GRU model classes
-└── forecasting.py              # Multi-step forecasting logic
+├── Data/
+│   ├── Html/              
+│   └── Output/                 
+│
+├── component/
+│   ├── preprocess.py           
+│   ├── EDA.py                  
+│   ├── univariate/            
+│   └── multivariate/           
+│
+├── maincode/
+│   ├── combine_csv.py               
+│   └── main.py    
+
 ```
+
 # ✅ 📊 Dashboard (Streamlit App)
 
 Our interactive FCPS Meal Analytics Dashboard provides real-time insights into school meal operations.

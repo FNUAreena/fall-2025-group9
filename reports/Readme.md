@@ -3,20 +3,27 @@
 ```
 reports/
 ├── Latex_report/
+│   └── fig
 │   └── File_Setup.tex
 │   └── Report_PDF.pdf
-│   └── Report_Paper.text
 │   └── references.bib
-│   └── fig/
-│       └── .gitkeep
+│   └── word_report.text
+│ 
 │
 ├── Markdown_Report/
 │   └── .gitkeep
 │
 ├── Progress_Report/
-│   └── Word_Report/
-│       ├── .gitkeep
-│       ├── capstone (1) 1-2.pdf
-│       └── .gitkeep
+│    ├── Markdown_CheatSheet
+│    │                     ├── Markdown1.pdf
+│    │                     ├── Markdown2.pdf
+│    │                     ├── Markdown3.pdf
+│    │                     └── Markdown4.pdf
+│    │
+│    ├── Progress_Report.md
+│    └── img_2.png
+|
+|── Word_Report/   
+     └── Final Report.docx  
 
 ```
