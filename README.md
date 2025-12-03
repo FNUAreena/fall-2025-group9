@@ -5,10 +5,6 @@ This project develops a time-series forecasting system for Fairfax County Public
 The goal is simple:
 👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
 
-The goal is simple:
-👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
-
-
 # 🏷️ Badges  
 
 <p align="left">
