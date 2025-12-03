@@ -2,31 +2,30 @@
 
 
 ```text
-src/
-├── Data/
-│   ├── Html/
+src
+├── Data
+│   ├── Html
 │   │   ├── May 2025 Breakfast production records/
 │   │   │   (all daily *.html breakfast files)
 │   │   └── May 2025 Lunch production records/
 │   │       (all daily *.html lunch files)
 │   │
-│   └── Output/
+│   └── Output
 │       ├── breakfast_combined.csv
 │       ├── lunch_combined.csv
 │       └── meals_combined.csv
 │
-├── component/
+├── component
 │   ├── EDA.py
 │   ├── preprocess.py
 │   │
-│   ├── multivariate/
+│   ├── multivariate
 │   │   ├── model.py
 │   │   ├── plot.py
 │   │   ├── training.py
 │   │   └── utils.py
 │   │
-│   └── univariate/
-│       ├── app.py
+│   └── univariate
 │       ├── comparing_model.py
 │       ├── forecasting.py
 │       ├── model.py
@@ -34,13 +33,13 @@ src/
 │       ├── training.py
 │       └── utils.py
 │
-├── maincode/
+├── maincode
 │   └── main.py
 │
-├── results/
+├── results
 │   └── all_school_meal_forecasts.csv
 │
-├── tests/
+├── tests
 │    ├── combine_csv.py
 │    └── multivariate_main.py
 │   
