@@ -47,19 +47,19 @@ streamlit run demo/streamlit_app.py
 ## Demo Folder
 
   ```
-demo/
-├── fig/
+demo
+├── fig
 │   └── .gitkeep
 │
-├── images/
-│   ├── multivariate_plots/
+├── images
+│   ├── multivariate_plots
 │   │   ├── GRU.png
 │   │   ├── LSTM.png
 │   │   ├── fnn_model.png
 │   │   ├── linear_regression.png
 │   │   └── xgboost_model.png
 │   │
-│   └── univariate_plots/
+│   └── univariate_plots
 │       ├── GRU.png
 │       ├── LSTM.png
 │       ├── LSTM_train_test_forecast_example.png

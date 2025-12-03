@@ -33,9 +33,9 @@ The src/ folder contains the complete backend pipeline for the FCPS Meal Product
 src
 ├── Data
 │   ├── Html
-│   │   ├── May 2025 Breakfast production records/
+│   │   ├── May 2025 Breakfast production records
 │   │   │   (all daily *.html breakfast files)
-│   │   └── May 2025 Lunch production records/
+│   │   └── May 2025 Lunch production records
 │   │       (all daily *.html lunch files)
 │   │
 │   └── Output

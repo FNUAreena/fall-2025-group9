@@ -12,8 +12,8 @@ These documents align with GWU’s capstone deliverable requirements and provide
 ## Report Folder
 
 ```
-reports/
-├── Latex_report/
+reports
+├── Latex_report
 │   └── fig
 │   └── File_Setup.tex
 │   └── Report_PDF.pdf
@@ -21,10 +21,10 @@ reports/
 │   └── word_report.text
 │ 
 │
-├── Markdown_Report/
+├── Markdown_Report
 │   └── .gitkeep
 │
-├── Progress_Report/
+├── Progress_Report
 │    ├── Markdown_CheatSheet
 │    │                     ├── Markdown1.pdf
 │    │                     ├── Markdown2.pdf
@@ -34,7 +34,7 @@ reports/
 │    ├── Progress_Report.md
 │    └── img_2.png
 |
-|── Word_Report/   
+|── Word_Report   
      └── Final Report.docx  
 
 ```
