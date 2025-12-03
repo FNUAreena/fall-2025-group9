@@ -330,8 +330,9 @@ streamlit run demo/app.py
 │   └── app.py
 │
 ├── presentation
-│   ├── .gitkeep
-│   └── Capstone.ppt
+│   ├── Capstone_Presentation_Group9.pptx
+|   ├── Capstone_Presentation_Group9.pdf 
+│   └── .gitkeep
 │
 ├── reports
 │   ├── Latex_report
