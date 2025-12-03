@@ -49,7 +49,8 @@ src
 ```
 
 
-🚀 How to Run
+## 🚀 How to Run
+
 To execute the full pipeline and generate fresh outputs for the dashboard:
 
 Ensure prerequisites are installed (see root README).
