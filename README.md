@@ -5,10 +5,6 @@ This project develops a time-series forecasting system for Fairfax County Public
 The goal is simple:
 👉 Reduce food waste, improve planning, and optimize meal production costs across the district.
 
-### 🎯 Project Goal
-To develop a predictive system that enables FCPS to reduce food waste, improve budgetary planning, and optimize operational efficiency by forecasting daily school meal production costs using machine learning and deep learning models.
-
-
 # 🏷️ Badges  
 
 <p align="left">
