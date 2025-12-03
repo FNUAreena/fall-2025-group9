@@ -126,9 +126,23 @@ def aggregate_forecasts_for_date(df_forecasts: pd.DataFrame, target_date: pd.Tim
     total = df_forecasts.loc[mask, TARGET_COL].sum()
     return float(total)
 
-# --- UI Layout ---
+# --- Main Page Layout ---
 st.title("School Production Cost — Forecasting Dashboard")
 df_series = load_series()
+st.sidebar.title("📊 Project Dashboard")
+
+selected_view = st.sidebar.radio(
+    "Select a View:",
+    (
+        "Single School Forecast",
+        "Historical vs Forecast Plot",
+        "Top Production Cost Schools",
+        "School Loss Analysis",
+    ),
+)
+
+st.sidebar.markdown("---")
+
 left_col, right_col = st.columns([2, 1])
 
 if "forecast_df" not in st.session_state:
@@ -226,7 +240,6 @@ with left_col:
     if loss_df.empty:
         st.success("No schools show significant over- or under-production based on the selected threshold ✅")
     else:
-        st.warning("Some schools appear to be losing money due to overproduction or underproduction.")
 
         cols = [
             c
@@ -251,19 +264,20 @@ with right_col:
     n_rows = len(df_series)
     min_date = pd.to_datetime(df_series[DATE_COL].min())
     max_date = pd.to_datetime(df_series[DATE_COL].max())
-
+    date_span_days = pd.to_datetime(df_series[DATE_COL]).dt.date.nunique()
     c1, c2 = st.columns(2)
     with c1:
         st.metric("Number of schools", n_schools)
         st.metric("Meal types", n_meal_types)
     with c2:
         st.metric("Total records", n_rows)
-        st.metric("Date range", f"{min_date.date()} → {max_date.date()}")
+        st.metric("Total days", date_span_days)
+        st.caption(f"From {min_date.date()} to {max_date.date()}")
 
     st.markdown("---")
 
     # --- HISTORICAL TREND (ALL SCHOOLS) ---
-    st.subheader("District-wide historical production cost")
+    st.subheader("Overall School historical production cost")
 
     daily_totals = (
         df_series.groupby(DATE_COL, sort=True)[TARGET_COL]
@@ -273,6 +287,11 @@ with right_col:
     st.line_chart(
         daily_totals.set_index(DATE_COL)[TARGET_COL],
         height=200,
+    )
+    total_hist_cost = float(daily_totals[TARGET_COL].sum())
+    st.metric(
+        "Historical total production cost (all schools)",
+        f"${total_hist_cost:,.0f}",
     )
     st.caption("Total daily production cost across all schools and meals.")
     st.markdown("---")
@@ -351,24 +370,7 @@ with right_col:
         else:
 
             total_cost_all = df_all_forecasts[TARGET_COL].sum()
-            st.markdown(
-                "### 📦 TOTAL Forecasted Production Cost "
-                "(all schools, sum over horizon)"
-            )
+            st.markdown("### 📦 TOTAL Forecasted Production Cost ")
             st.markdown(f"## ${total_cost_all:,.2f}")
-            st.caption(f"Per-school forecasts failed or skipped: {failed}")
     st.markdown("---")
-    
-
-st.sidebar.header("Suggestions & Next features you can add")
-st.sidebar.markdown("""
-- Add a **model selection** dropdown (LSTM/GRU/baseline) so users can compare models.  
-- Show **error metrics** per-school (MAE, RMSE, R²) after backtesting.  
-- Enable **batch model training** from the UI (with safety checks).  
-- Add **seasonal decomposition** (STL) and show components per school.  
-- Allow **calendar-style** selection and bulk forecast exports.  
-- Provide **confidence intervals** using bootstrap or MC-dropout.  
-""")
-
 st.sidebar.markdown("---")
-st.sidebar.write("App note: per-school forecasting requires saved per-school model files created by `training.py`. If many models are missing the aggregation steps will skip those schools (you'll see counts).")
