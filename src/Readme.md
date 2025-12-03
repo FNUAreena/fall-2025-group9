@@ -51,9 +51,9 @@ src
 
 ## 🚀 How to Run
 
-To execute the full pipeline and generate fresh outputs for the dashboard:
+To execute the full pipeline and generate outputs :
 
-Ensure prerequisites are installed (see root README).
+Ensure prerequisites are installed.
 
 Run the Main :
 ```bash
