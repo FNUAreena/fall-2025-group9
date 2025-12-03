@@ -298,6 +298,7 @@ streamlit run demo/app.py
 
 ## Folder Structure
 
+```
 ├── demo
 │   ├── fig
 │   │   └── .gitkeep
@@ -403,7 +404,7 @@ streamlit run demo/app.py
     │
     ├── .gitkeep
     └── requirements.txt
-
+```
 
 # 📡 API Endpoints
 
