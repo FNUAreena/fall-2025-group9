@@ -1,3 +1,31 @@
+# Overview 
+
+The src/ folder contains the complete backend pipeline for the FCPS Meal Production Forecasting project. It is responsible for transforming raw production records into clean datasets and training forecasting models that power both the research paper and the Streamlit dashboard.
+
+🔧 What Happens Inside src/
+
+1️⃣ Data Ingestion & Cleaning
+- Parses breakfast and lunch HTML production records
+- Extracts served, planned, discarded, leftover, and cost values
+- Removes noise, fixes inconsistent formats, and standardizes all fields
+- Generates combined CSVs in `Data/Output/`
+
+2️⃣ Exploratory Data Analysis (EDA)
+- Visualizes cost trends, waste ratios, and participation patterns
+- Generates plots used in the dashboard & research paper
+- Performs outlier detection and statistical summaries
+
+3️⃣ Forecasting Models
+- Univariate models: LSTM, GRU, FNN, XGBoost, Linear Regression
+- Multivariate models: GRU, LSTM, XGBoost, FNN
+- Creates sliding windows, trains models, evaluates metrics, and saves outputs
+
+4️⃣ Pipeline Scripts
+- `combine_csv.py` → HTML → CSV merging
+- `univariate_main.py` → Runs univariate forecasting
+- `multivariate_main.py` → Runs multivariate forecasting
+- Saves plots + results to `demo/images/`
+
 ## src folder
 
 
